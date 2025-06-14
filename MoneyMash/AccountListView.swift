@@ -36,6 +36,12 @@ struct AccountListView: View {
                     NavigationLink("Add", destination: AddAccountView())
                 }
             }
+            .onAppear {
+                #if DEBUG
+                // Populate with sample data if database is empty (debug only)
+                SampleData.populateIfEmpty(context: context)
+                #endif
+            }
         }
     }
     
