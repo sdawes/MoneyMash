@@ -105,12 +105,22 @@ struct AddAccountView: View {
         
         let account = FinancialAccount(
             type: selectedType,
-            provider: trimmedProvider,
-            balance: finalBalance
+            provider: trimmedProvider
         )
         
         context.insert(account)
-        dismiss()
+        
+        // Create initial balance update
+        let initialUpdate = BalanceUpdate(balance: finalBalance, account: account)
+        context.insert(initialUpdate)
+        
+        do {
+            try context.save()
+            dismiss()
+        } catch {
+            errorMessage = "Failed to save account: \(error.localizedDescription)"
+            showingError = true
+        }
     }
     
     private func formatCurrency(_ input: String) -> String {

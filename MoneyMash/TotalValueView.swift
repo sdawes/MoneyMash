@@ -58,7 +58,7 @@ struct TotalValueView: View {
     
     private var totalNetWorth: Decimal {
         accounts.reduce(0) { total, account in
-            total + account.balance
+            total + account.currentBalance
         }
     }
     
@@ -69,7 +69,7 @@ struct TotalValueView: View {
                 !isDebtAccount(account.type) && !isPensionAccount(account.type)
             }
             .reduce(0) { total, account in
-                total + account.balance
+                total + account.currentBalance
             }
     }
     
@@ -79,7 +79,7 @@ struct TotalValueView: View {
                 isDebtAccount(account.type)
             }
             .reduce(0) { total, account in
-                total + account.balance
+                total + account.currentBalance
             }
     }
     

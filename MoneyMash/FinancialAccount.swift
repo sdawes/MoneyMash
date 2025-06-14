@@ -12,12 +12,28 @@ import SwiftData
 class FinancialAccount {
     var type: AccountType
     var provider: String
-    var balance: Decimal
+    @Relationship(deleteRule: .cascade, inverse: \BalanceUpdate.account) var balanceUpdates: [BalanceUpdate] = []
 
-    init(type: AccountType, provider: String, balance: Decimal) {
+    init(type: AccountType, provider: String) {
         self.type = type
         self.provider = provider
-        self.balance = balance
+    }
+    
+    // MARK: - Computed Properties
+    
+    var currentBalance: Decimal {
+        balanceUpdates.sorted { $0.date > $1.date }.first?.balance ?? 0
+    }
+    
+    var lastUpdateDate: Date? {
+        balanceUpdates.sorted { $0.date > $1.date }.first?.date
+    }
+    
+    var formattedLastUpdateDate: String {
+        guard let lastUpdate = lastUpdateDate else { return "No updates" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "d MMM yy"
+        return "Last updated: " + formatter.string(from: lastUpdate)
     }
 }
 

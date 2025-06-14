@@ -11,6 +11,10 @@ import SwiftData
 struct AccountListView: View {
     @Environment(\.modelContext) private var context
     @Query private var accounts: [FinancialAccount]
+    
+    private var sortedAccounts: [FinancialAccount] {
+        accounts.sorted { $0.currentBalance > $1.currentBalance }
+    }
 
     var body: some View {
         NavigationStack {
@@ -29,18 +33,28 @@ struct AccountListView: View {
                 
                 // Financial Accounts Section
                 Section {
-                    ForEach(accounts, id: \.self) { account in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(account.type.rawValue)
-                                .font(.headline)
-                            Text("Provider: \(account.provider)")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
-                            Text("Balance: \(account.balance.formatted(.currency(code: "GBP")))")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
+                    ForEach(sortedAccounts, id: \.self) { account in
+                        NavigationLink(destination: AccountDetailView(account: account)) {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(account.type.rawValue)
+                                    .font(.headline)
+                                Text("Provider: \(account.provider)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                HStack {
+                                    Text("Balance: \(account.currentBalance.formatted(.currency(code: "GBP")))")
+                                        .font(.subheadline)
+                                        .fontWeight(.medium)
+                                    
+                                    Spacer()
+                                    
+                                    Text(account.formattedLastUpdateDate.replacingOccurrences(of: "Last updated: ", with: ""))
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                            .padding(.vertical, 2)
                         }
-                        .padding(.vertical, 2)
                     }
                     .onDelete(perform: deleteAccounts)
                 }
@@ -63,7 +77,7 @@ struct AccountListView: View {
     private func deleteAccounts(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                context.delete(accounts[index])
+                context.delete(sortedAccounts[index])
             }
         }
     }

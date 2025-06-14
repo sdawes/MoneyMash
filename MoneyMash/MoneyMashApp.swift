@@ -14,6 +14,6 @@ struct MoneyMashApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: FinancialAccount.self)
+        .modelContainer(for: [FinancialAccount.self, BalanceUpdate.self])
     }
 }
