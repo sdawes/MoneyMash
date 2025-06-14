@@ -31,7 +31,7 @@ struct AddAccountView: View {
                     TextField("Provider (e.g. HL, Vanguard)", text: $provider)
                         .textInputAutocapitalization(.words)
 
-                    TextField("Balance (e.g. 45.50)", text: $balanceString)
+                    TextField(balanceFieldLabel, text: $balanceString)
                         .keyboardType(.decimalPad)
                         .onChange(of: balanceString) { _, newValue in
                             balanceString = formatCurrency(newValue)
@@ -68,9 +68,27 @@ struct AddAccountView: View {
         parseCurrency(balanceString) != nil
     }
     
+    private var balanceFieldLabel: String {
+        switch selectedType {
+        case .mortgage, .loan, .creditCard:
+            return "Amount owed (e.g. 1200.50)"
+        default:
+            return "Balance (e.g. 45.50)"
+        }
+    }
+    
+    private var isDebtAccount: Bool {
+        switch selectedType {
+        case .mortgage, .loan, .creditCard:
+            return true
+        default:
+            return false
+        }
+    }
+    
     private func saveAccount() {
-        guard let balance = parseCurrency(balanceString), balance > 0 else {
-            errorMessage = "Please enter a valid balance amount"
+        guard let rawBalance = parseCurrency(balanceString), rawBalance > 0 else {
+            errorMessage = isDebtAccount ? "Please enter a valid amount owed" : "Please enter a valid balance amount"
             showingError = true
             return
         }
@@ -82,10 +100,13 @@ struct AddAccountView: View {
             return
         }
         
+        // For debt accounts, convert positive input to negative balance
+        let finalBalance = isDebtAccount ? -rawBalance : rawBalance
+        
         let account = FinancialAccount(
             type: selectedType,
             provider: trimmedProvider,
-            balance: balance
+            balance: finalBalance
         )
         
         context.insert(account)

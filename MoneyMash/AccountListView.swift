@@ -15,20 +15,35 @@ struct AccountListView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(accounts, id: \.self) { account in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(account.type.rawValue)
-                            .font(.headline)
-                        Text("Provider: \(account.provider)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        Text("Balance: \(account.balance.formatted(.currency(code: "GBP")))")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-                    .padding(.vertical, 2)
+                // Total Value Summary as first item
+                Section {
+                    TotalValueView()
+                        .listRowInsets(EdgeInsets())
+                        .listRowBackground(Color.clear)
+                } header: {
+                    EmptyView()
+                } footer: {
+                    EmptyView()
                 }
-                .onDelete(perform: deleteAccounts)
+                .listSectionSeparator(.hidden)
+                
+                // Financial Accounts Section
+                Section {
+                    ForEach(accounts, id: \.self) { account in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(account.type.rawValue)
+                                .font(.headline)
+                            Text("Provider: \(account.provider)")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            Text("Balance: \(account.balance.formatted(.currency(code: "GBP")))")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                        }
+                        .padding(.vertical, 2)
+                    }
+                    .onDelete(perform: deleteAccounts)
+                }
             }
             .navigationTitle("Accounts")
             .toolbar {
