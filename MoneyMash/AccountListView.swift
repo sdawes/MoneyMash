@@ -12,8 +12,35 @@ struct AccountListView: View {
     @Environment(\.modelContext) private var context
     @Query private var accounts: [FinancialAccount]
     
+    @State private var animationPhase: Double = 0
+    
     private var sortedAccounts: [FinancialAccount] {
         accounts.sorted { $0.currentBalance > $1.currentBalance }
+    }
+    
+    private var animatedColors: [Color] {
+        let phase1Colors: [(Double, Double, Double)] = [
+            (0.9, 0.95, 0.92), (0.92, 0.94, 0.98), (0.94, 0.96, 0.98),
+            (0.93, 0.96, 0.94), (0.98, 0.98, 0.98), (0.91, 0.94, 0.97),
+            (0.90, 0.93, 0.96), (0.92, 0.95, 0.93), (0.93, 0.95, 0.97)
+        ]
+        
+        let phase2Colors: [(Double, Double, Double)] = [
+            (0.85, 0.90, 0.95), (0.88, 0.91, 0.96), (0.90, 0.93, 0.97),
+            (0.87, 0.92, 0.96), (0.95, 0.95, 0.98), (0.89, 0.92, 0.97),
+            (0.86, 0.89, 0.94), (0.91, 0.94, 0.89), (0.88, 0.91, 0.96)
+        ]
+        
+        // Interpolate between the two color sets based on animation phase
+        let t = (sin(animationPhase) + 1) / 2 // Normalize to 0-1
+        
+        return zip(phase1Colors, phase2Colors).map { color1, color2 in
+            Color(
+                red: color1.0 * (1 - t) + color2.0 * t,
+                green: color1.1 * (1 - t) + color2.1 * t,
+                blue: color1.2 * (1 - t) + color2.2 * t
+            )
+        }
     }
 
     var body: some View {
@@ -29,11 +56,7 @@ struct AccountListView: View {
                             .init(0, 0.5), .init(0.5, 0.5), .init(1, 0.5),
                             .init(0, 1), .init(0.5, 1), .init(1, 1)
                         ],
-                        colors: [
-                            Color(red: 0.9, green: 0.95, blue: 0.92), Color(red: 0.92, green: 0.94, blue: 0.98), Color(red: 0.94, green: 0.96, blue: 0.98),
-                            Color(red: 0.93, green: 0.96, blue: 0.94), Color(red: 0.98, green: 0.98, blue: 0.98), Color(red: 0.91, green: 0.94, blue: 0.97),
-                            Color(red: 0.90, green: 0.93, blue: 0.96), Color(red: 0.92, green: 0.95, blue: 0.93), Color(red: 0.93, green: 0.95, blue: 0.97)
-                        ]
+                        colors: animatedColors
                     )
                     .ignoresSafeArea()
                 }
@@ -44,10 +67,6 @@ struct AccountListView: View {
                         TotalValueView()
                             .listRowInsets(EdgeInsets())
                             .listRowBackground(Color.clear)
-                    } header: {
-                        EmptyView()
-                    } footer: {
-                        EmptyView()
                     }
                     .listSectionSeparator(.hidden)
                     
@@ -82,8 +101,18 @@ struct AccountListView: View {
                 .scrollContentBackground(.hidden)
             }
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Text("MoneyMash")
+                        .font(.headline)
+                        .foregroundColor(.secondary)
+                }
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    NavigationLink("Add", destination: AddAccountView())
+                    NavigationLink(destination: AddAccountView()) {
+                        Image(systemName: "plus")
+                            .font(.title2)
+                            .fontWeight(.medium)
+                    }
                 }
             }
             .onAppear {
@@ -91,6 +120,9 @@ struct AccountListView: View {
                 // Populate with sample data if database is empty (debug only)
                 SampleData.populateIfEmpty(context: context)
                 #endif
+                
+                // Start gradient animation
+                startGradientAnimation()
             }
         }
     }
@@ -100,6 +132,12 @@ struct AccountListView: View {
             for index in offsets {
                 context.delete(sortedAccounts[index])
             }
+        }
+    }
+    
+    private func startGradientAnimation() {
+        withAnimation(.linear(duration: 5).repeatForever(autoreverses: false)) {
+            animationPhase = .pi * 2
         }
     }
 }

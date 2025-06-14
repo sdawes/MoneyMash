@@ -17,41 +17,41 @@ struct TotalValueView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Debt")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 Text(totalDebt.formatted(.currency(code: "GBP")))
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.red)
+                    .foregroundColor(Color(red: 1.0, green: 0.8, blue: 0.9))
             }
             
             // Liquid Assets
             VStack(alignment: .leading, spacing: 2) {
                 Text("Liquid Assets")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 Text(liquidAssets.formatted(.currency(code: "GBP")))
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.cyan)
             }
             
             // Total Net Worth
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Net Worth")
                     .font(.subheadline)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.white.opacity(0.8))
                 
                 Text(totalNetWorth.formatted(.currency(code: "GBP")))
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+                    .foregroundColor(totalNetWorth >= 0 ? .white : .pink)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color.white)
+        .background(Color(red: 0.15, green: 0.35, blue: 0.45))
     }
     
     // MARK: - Calculations
