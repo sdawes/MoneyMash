@@ -10,292 +10,107 @@ import SwiftData
 
 #if DEBUG
 struct SampleData {
-    
     static func populateIfEmpty(context: ModelContext) {
-        // Check if database is already populated
-        let descriptor = FetchDescriptor<FinancialAccount>()
-        let existingAccounts = try? context.fetch(descriptor)
+        // Check if we already have data
+        let fetchDescriptor = FetchDescriptor<FinancialAccount>()
+        let existingAccounts = (try? context.fetch(fetchDescriptor)) ?? []
         
-        guard existingAccounts?.isEmpty == true else {
-            print("Database already contains accounts, skipping sample data population")
-            return
+        guard existingAccounts.isEmpty else { return }
+        
+        // Create accounts based on your actual portfolio
+        let cashISA_T212 = FinancialAccount(type: .cashISA, provider: "Trading 212")
+        let stocksISA_T212 = FinancialAccount(type: .stocksAndSharesISA, provider: "Trading 212")
+        let stocksISA_HL = FinancialAccount(type: .stocksAndSharesISA, provider: "HL")
+        let pension_HL = FinancialAccount(type: .pension, provider: "HL")
+        let savings_HL = FinancialAccount(type: .savingsAccount, provider: "HL")
+        let cashISA_Monzo = FinancialAccount(type: .cashISA, provider: "Monzo")
+        let savings_Monzo = FinancialAccount(type: .savingsAccount, provider: "Monzo")
+        let creditCard_Barclays = FinancialAccount(type: .creditCard, provider: "Barclays")
+        let creditCard_AMEX = FinancialAccount(type: .creditCard, provider: "AMEX")
+        
+        // Insert accounts
+        let accounts = [cashISA_T212, stocksISA_T212, stocksISA_HL, pension_HL, savings_HL, 
+                       cashISA_Monzo, savings_Monzo, creditCard_Barclays, creditCard_AMEX]
+        accounts.forEach { context.insert($0) }
+        
+        // Create historical balance updates
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Cash ISA Trading 212 - Current: £21,881.80
+        let cashISA_T212_Balances: [Decimal] = [21881.80, 21456.23, 20998.76, 20123.45, 19785.67, 19234.89]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: cashISA_T212_Balances[i], date: date, account: cashISA_T212)
+            context.insert(update)
         }
         
-        print("Database is empty, populating with sample data...")
-        
-        // Create sample accounts with realistic UK financial data
-        let sampleAccounts = createSampleAccounts()
-        
-        // Insert all sample accounts
-        for account in sampleAccounts {
-            context.insert(account)
+        // Stocks & Shares ISA Trading 212 - Current: £4,296.51
+        let stocksISA_T212_Balances: [Decimal] = [4296.51, 4089.34, 3876.23, 3654.12, 3423.78, 3198.45]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: stocksISA_T212_Balances[i], date: date, account: stocksISA_T212)
+            context.insert(update)
         }
         
-        // Create historical balance updates for each account
-        createHistoricalUpdates(for: sampleAccounts, context: context)
-        
-        // Save the context
-        do {
-            try context.save()
-            print("Successfully populated database with \(sampleAccounts.count) sample accounts and historical updates")
-        } catch {
-            print("Failed to save sample data: \(error)")
-        }
-    }
-    
-    private static func createSampleAccounts() -> [FinancialAccount] {
-        return [
-            // Current Account
-            FinancialAccount(type: .currentAccount, provider: "Monzo"),
-            
-            // Savings Accounts (couple as requested)
-            FinancialAccount(type: .savingsAccount, provider: "Marcus by Goldman Sachs"),
-            FinancialAccount(type: .savingsAccount, provider: "Chase"),
-            
-            // ISAs (one of each type)
-            FinancialAccount(type: .cashISA, provider: "Nationwide"),
-            FinancialAccount(type: .stocksAndSharesISA, provider: "Vanguard"),
-            FinancialAccount(type: .lifetimeISA, provider: "Monzo"),
-            FinancialAccount(type: .juniorISA, provider: "Fidelity"),
-            
-            // Investment Account
-            FinancialAccount(type: .generalInvestmentAccount, provider: "Interactive Investor"),
-            
-            // Pensions (two as requested)
-            FinancialAccount(type: .pension, provider: "Aviva"),
-            FinancialAccount(type: .pension, provider: "Legal & General"),
-            FinancialAccount(type: .juniorSIPP, provider: "AJ Bell"),
-            
-            // Debt Accounts
-            FinancialAccount(type: .mortgage, provider: "Nationwide"),
-            FinancialAccount(type: .loan, provider: "Santander"),
-            FinancialAccount(type: .creditCard, provider: "American Express"),
-            
-            // Alternative Assets
-            FinancialAccount(type: .crypto, provider: "Coinbase"),
-            FinancialAccount(type: .foreignCurrency, provider: "Wise"),
-            FinancialAccount(type: .cash, provider: "Physical Cash")
-        ]
-    }
-    
-    private static func createHistoricalUpdates(for accounts: [FinancialAccount], context: ModelContext) {
-        let calendar = Calendar.current
-        
-        // Create dates for the last 4 months (March to June 2025)
-        guard let march1 = calendar.date(from: DateComponents(year: 2025, month: 3, day: 1)),
-              let april1 = calendar.date(from: DateComponents(year: 2025, month: 4, day: 1)),
-              let may1 = calendar.date(from: DateComponents(year: 2025, month: 5, day: 1)),
-              let june1 = calendar.date(from: DateComponents(year: 2025, month: 6, day: 1)) else {
-            return
+        // Stocks & Shares ISA HL - Current: £12,259.78
+        let stocksISA_HL_Balances: [Decimal] = [12259.78, 11876.23, 11523.45, 11089.67, 10654.89, 10234.12]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: stocksISA_HL_Balances[i], date: date, account: stocksISA_HL)
+            context.insert(update)
         }
         
-        for account in accounts {
-            switch account.type {
-            case .currentAccount:
-                createCurrentAccountHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .savingsAccount:
-                createSavingsAccountHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .cashISA, .stocksAndSharesISA, .lifetimeISA, .juniorISA:
-                createISAHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .generalInvestmentAccount:
-                createInvestmentHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .pension, .juniorSIPP:
-                createPensionHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .mortgage:
-                createMortgageHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .loan:
-                createLoanHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .creditCard:
-                createCreditCardHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .crypto:
-                createCryptoHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .foreignCurrency:
-                createForeignCurrencyHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            case .cash:
-                createCashHistory(account: account, march1: march1, april1: april1, may1: may1, june1: june1, context: context)
-            }
+        // Pension HL - Current: £71,688
+        let pension_HL_Balances: [Decimal] = [71688.00, 70234.56, 68789.23, 67345.67, 65901.34, 64456.78]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: pension_HL_Balances[i], date: date, account: pension_HL)
+            context.insert(update)
         }
-    }
-    
-    // MARK: - Account-specific history creators
-    
-    private static func createCurrentAccountHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
         
-        // March - initial balance
-        let march3 = calendar.date(byAdding: .day, value: 2, to: march1)!
-        context.insert(BalanceUpdate(balance: 1256.78, date: march3, account: account))
-        
-        // April - salary + spending
-        let april2 = calendar.date(byAdding: .day, value: 1, to: april1)!
-        context.insert(BalanceUpdate(balance: 3420.90, date: april2, account: account))
-        
-        let april15 = calendar.date(byAdding: .day, value: 14, to: april1)!
-        context.insert(BalanceUpdate(balance: 2180.45, date: april15, account: account))
-        
-        // May - salary + spending
-        let may1st = calendar.date(byAdding: .day, value: 0, to: may1)!
-        context.insert(BalanceUpdate(balance: 4250.30, date: may1st, account: account))
-        
-        // June - current balance
-        let june3 = calendar.date(byAdding: .day, value: 2, to: june1)!
-        context.insert(BalanceUpdate(balance: 2847.32, date: june3, account: account))
-    }
-    
-    private static func createSavingsAccountHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
-        let isFirstSavings = account.provider == "Marcus by Goldman Sachs"
-        
-        if isFirstSavings {
-            // Marcus - growing significantly
-            context.insert(BalanceUpdate(balance: 12800.00, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 13950.00, date: april1, account: account))
-            context.insert(BalanceUpdate(balance: 14600.00, date: may1, account: account))
-            let june2 = calendar.date(byAdding: .day, value: 1, to: june1)!
-            context.insert(BalanceUpdate(balance: 15400.00, date: june2, account: account))
-        } else {
-            // Chase - slower growth
-            context.insert(BalanceUpdate(balance: 7500.00, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 8000.50, date: april1, account: account))
-            context.insert(BalanceUpdate(balance: 8350.25, date: may1, account: account))
-            let june4 = calendar.date(byAdding: .day, value: 3, to: june1)!
-            context.insert(BalanceUpdate(balance: 8750.50, date: june4, account: account))
+        // Cash Savings HL - Current: £44,775.93
+        let savings_HL_Balances: [Decimal] = [44775.93, 43234.67, 41789.45, 40345.23, 38901.56, 37456.89]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: savings_HL_Balances[i], date: date, account: savings_HL)
+            context.insert(update)
         }
-    }
-    
-    private static func createISAHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
         
-        switch account.type {
-        case .cashISA:
-            // Nationwide Cash ISA - steady contributions
-            context.insert(BalanceUpdate(balance: 16000.00, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 17500.00, date: april1, account: account))
-            context.insert(BalanceUpdate(balance: 19000.00, date: may1, account: account))
-            let june1st = calendar.date(byAdding: .day, value: 0, to: june1)!
-            context.insert(BalanceUpdate(balance: 20000.00, date: june1st, account: account))
-            
-        case .stocksAndSharesISA:
-            // Vanguard S&S ISA - market fluctuations
-            context.insert(BalanceUpdate(balance: 16420.80, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 17890.45, date: april1, account: account))
-            let may15 = calendar.date(byAdding: .day, value: 14, to: may1)!
-            context.insert(BalanceUpdate(balance: 18120.65, date: may15, account: account))
-            let june5 = calendar.date(byAdding: .day, value: 4, to: june1)!
-            context.insert(BalanceUpdate(balance: 18750.25, date: june5, account: account))
-            
-        case .lifetimeISA:
-            // Monzo LISA - monthly contributions
-            context.insert(BalanceUpdate(balance: 9500.00, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 10750.00, date: april1, account: account))
-            context.insert(BalanceUpdate(balance: 11600.00, date: may1, account: account))
-            let june2 = calendar.date(byAdding: .day, value: 1, to: june1)!
-            context.insert(BalanceUpdate(balance: 12500.00, date: june2, account: account))
-            
-        case .juniorISA:
-            // Fidelity Junior ISA - occasional contributions
-            context.insert(BalanceUpdate(balance: 4800.20, date: march1, account: account))
-            context.insert(BalanceUpdate(balance: 5240.80, date: may1, account: account))
-            let june8 = calendar.date(byAdding: .day, value: 7, to: june1)!
-            context.insert(BalanceUpdate(balance: 5680.40, date: june8, account: account))
-            
-        default:
-            break
+        // Cash ISA Monzo - Current: £18,563.69
+        let cashISA_Monzo_Balances: [Decimal] = [18563.69, 17234.45, 15876.23, 14567.89, 13234.56, 11901.23]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: cashISA_Monzo_Balances[i], date: date, account: cashISA_Monzo)
+            context.insert(update)
         }
-    }
-    
-    private static func createInvestmentHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
         
-        // Interactive Investor - volatile market movements
-        context.insert(BalanceUpdate(balance: 22450.30, date: march1, account: account))
-        let march20 = calendar.date(byAdding: .day, value: 19, to: march1)!
-        context.insert(BalanceUpdate(balance: 21890.75, date: march20, account: account))
-        context.insert(BalanceUpdate(balance: 24120.40, date: april1, account: account))
-        let may3 = calendar.date(byAdding: .day, value: 2, to: may1)!
-        context.insert(BalanceUpdate(balance: 25750.60, date: may3, account: account))
-    }
-    
-    private static func createPensionHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
-        
-        if account.provider == "Aviva" {
-            // Aviva pension - quarterly updates
-            context.insert(BalanceUpdate(balance: 118500.00, date: march1, account: account))
-            let june15 = calendar.date(byAdding: .day, value: 14, to: june1)!
-            context.insert(BalanceUpdate(balance: 125000.00, date: june15, account: account))
-        } else if account.provider == "Legal & General" {
-            // L&G pension - quarterly updates
-            context.insert(BalanceUpdate(balance: 79200.50, date: march1, account: account))
-            let june10 = calendar.date(byAdding: .day, value: 9, to: june1)!
-            context.insert(BalanceUpdate(balance: 85500.75, date: june10, account: account))
-        } else {
-            // Junior SIPP - less frequent updates
-            context.insert(BalanceUpdate(balance: 7850.00, date: march1, account: account))
-            let june6 = calendar.date(byAdding: .day, value: 5, to: june1)!
-            context.insert(BalanceUpdate(balance: 8500.00, date: june6, account: account))
+        // Cash Savings Monzo - Current: £59,329.11
+        let savings_Monzo_Balances: [Decimal] = [59329.11, 57234.78, 55189.45, 53134.67, 51078.23, 49023.89]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: savings_Monzo_Balances[i], date: date, account: savings_Monzo)
+            context.insert(update)
         }
-    }
-    
-    private static func createMortgageHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        // Nationwide mortgage - monthly payments reducing balance
-        context.insert(BalanceUpdate(balance: -288500.00, date: march1, account: account))
-        context.insert(BalanceUpdate(balance: -287200.00, date: april1, account: account))
-        context.insert(BalanceUpdate(balance: -286100.00, date: may1, account: account))
-        context.insert(BalanceUpdate(balance: -285000.00, date: june1, account: account))
-    }
-    
-    private static func createLoanHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        // Santander loan - monthly payments
-        context.insert(BalanceUpdate(balance: -17200.00, date: march1, account: account))
-        context.insert(BalanceUpdate(balance: -16400.00, date: april1, account: account))
-        context.insert(BalanceUpdate(balance: -16000.00, date: may1, account: account))
-        context.insert(BalanceUpdate(balance: -15600.00, date: june1, account: account))
-    }
-    
-    private static func createCreditCardHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
         
-        // AMEX - fluctuating balance
-        context.insert(BalanceUpdate(balance: -892.50, date: march1, account: account))
-        let march15 = calendar.date(byAdding: .day, value: 14, to: march1)!
-        context.insert(BalanceUpdate(balance: -1456.75, date: march15, account: account))
-        context.insert(BalanceUpdate(balance: -678.20, date: april1, account: account))
-        let may20 = calendar.date(byAdding: .day, value: 19, to: may1)!
-        context.insert(BalanceUpdate(balance: -1247.50, date: may20, account: account))
-    }
-    
-    private static func createCryptoHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
+        // Credit Card Barclays - Current: £270.31 debt (negative)
+        let creditCard_Barclays_Balances: [Decimal] = [-270.31, -189.45, -345.67, -123.89, -456.78, -234.56]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: creditCard_Barclays_Balances[i], date: date, account: creditCard_Barclays)
+            context.insert(update)
+        }
         
-        // Coinbase - volatile crypto market
-        context.insert(BalanceUpdate(balance: 3420.60, date: march1, account: account))
-        let march10 = calendar.date(byAdding: .day, value: 9, to: march1)!
-        context.insert(BalanceUpdate(balance: 2890.40, date: march10, account: account))
-        context.insert(BalanceUpdate(balance: 3850.75, date: april1, account: account))
-        let may12 = calendar.date(byAdding: .day, value: 11, to: may1)!
-        context.insert(BalanceUpdate(balance: 4680.90, date: may12, account: account))
-        let june7 = calendar.date(byAdding: .day, value: 6, to: june1)!
-        context.insert(BalanceUpdate(balance: 4250.80, date: june7, account: account))
-    }
-    
-    private static func createForeignCurrencyHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
+        // Credit Card AMEX - Current: £650.18 debt (negative)
+        let creditCard_AMEX_Balances: [Decimal] = [-650.18, -567.89, -789.34, -423.67, -834.56, -612.45]
+        for i in 0..<6 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: creditCard_AMEX_Balances[i], date: date, account: creditCard_AMEX)
+            context.insert(update)
+        }
         
-        // Wise - exchange rate fluctuations
-        context.insert(BalanceUpdate(balance: 980.50, date: march1, account: account))
-        context.insert(BalanceUpdate(balance: 1085.75, date: april1, account: account))
-        let june4 = calendar.date(byAdding: .day, value: 3, to: june1)!
-        context.insert(BalanceUpdate(balance: 1150.25, date: june4, account: account))
-    }
-    
-    private static func createCashHistory(account: FinancialAccount, march1: Date, april1: Date, may1: Date, june1: Date, context: ModelContext) {
-        let calendar = Calendar.current
-        
-        // Physical cash - occasional updates
-        context.insert(BalanceUpdate(balance: 450.00, date: march1, account: account))
-        let may25 = calendar.date(byAdding: .day, value: 24, to: may1)!
-        context.insert(BalanceUpdate(balance: 320.00, date: may25, account: account))
+        // Save all changes
+        try? context.save()
     }
 }
 #endif

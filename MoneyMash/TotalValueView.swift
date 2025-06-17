@@ -18,25 +18,32 @@ struct TotalValueView: View {
         VStack(spacing: 8) {
             // Toggle Controls
             HStack {
-                Toggle("Include Mortgage in Debt", isOn: $includeMortgage)
-                    .font(.caption)
-                Spacer()
+                if hasMixedDebt {
+                    Toggle("Include Mortgage in Debt", isOn: $includeMortgage)
+                        .font(.caption)
+                    Spacer()
+                }
                 Toggle("Include Pensions in Wealth", isOn: $includePensions)
                     .font(.caption)
+                if !hasMixedDebt {
+                    Spacer()
+                }
             }
             .padding(.horizontal)
             .padding(.top, 8)
             
             // Summary Card
             VStack(spacing: 12) {
-                // Row 1: Total Debt
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Total Debt")
-                        .foregroundColor(.secondary)
-                    
-                    Text(totalDebt.formatted(.currency(code: "GBP")))
+                // Row 1: Debt (conditional)
+                if hasAnyDebt {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
+                            .foregroundColor(.secondary)
+                        
+                        Text(totalDebt.formatted(.currency(code: "GBP")))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Row 2: Assets and Net Worth
                 HStack(spacing: 12) {
@@ -97,11 +104,34 @@ struct TotalValueView: View {
     private var totalDebt: Decimal {
         accounts
             .filter { account in
-                isDebtAccount(account.type) && (account.type != .mortgage || includeMortgage)
+                // For mortgage-only scenario, always include mortgage
+                if hasOnlyMortgage {
+                    return isDebtAccount(account.type)
+                }
+                // For mixed debt, respect the mortgage toggle
+                return isDebtAccount(account.type) && (account.type != .mortgage || includeMortgage)
             }
             .reduce(0) { total, account in
                 total + account.currentBalance
             }
+    }
+    
+    // MARK: - Debt Situation Detection
+    
+    private var hasAnyDebt: Bool {
+        accounts.contains { isDebtAccount($0.type) }
+    }
+    
+    private var hasOnlyMortgage: Bool {
+        let debtAccounts = accounts.filter { isDebtAccount($0.type) }
+        return !debtAccounts.isEmpty && debtAccounts.allSatisfy { $0.type == .mortgage }
+    }
+    
+    private var hasMixedDebt: Bool {
+        let debtAccounts = accounts.filter { isDebtAccount($0.type) }
+        let hasMortgage = debtAccounts.contains { $0.type == .mortgage }
+        let hasOtherDebt = debtAccounts.contains { $0.type != .mortgage }
+        return hasMortgage && hasOtherDebt
     }
     
     // MARK: - Helper Functions
