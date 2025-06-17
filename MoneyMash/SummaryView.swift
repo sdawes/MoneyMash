@@ -1,5 +1,5 @@
 //
-//  TotalValueView.swift
+//  SummaryView.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -8,14 +8,14 @@
 import SwiftUI
 import SwiftData
 
-struct TotalValueView: View {
+struct SummaryView: View {
     @Query private var accounts: [FinancialAccount]
     
     @State private var includePensions = true
     @State private var includeMortgage = true
     
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             // Toggle Controls
             HStack {
                 if hasMixedDebt {
@@ -30,45 +30,50 @@ struct TotalValueView: View {
                 }
             }
             .padding(.horizontal)
-            .padding(.top, 8)
+            .padding(.vertical, 8)
             
-            // Summary Card
-            VStack(spacing: 12) {
-                // Row 1: Debt (conditional)
-                if hasAnyDebt {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
-                            .foregroundColor(.secondary)
-                        
-                        Text(totalDebt.formatted(.currency(code: "GBP")))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            // Financial Summary Header (styled like Account Header)
+            VStack(alignment: .leading, spacing: 12) {
+                // Row 1: Net Worth (primary metric)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Net Worth")
+                        .foregroundColor(.secondary)
+                    
+                    Text(totalNetWorth.formatted(.currency(code: "GBP")))
+                        .font(.system(.largeTitle, weight: .bold))
+                        .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
                 }
                 
-                // Row 2: Assets and Net Worth
+                // Row 2: Assets and Debt
                 HStack(spacing: 12) {
                     // Total Assets
-                    VStack(alignment: .leading, spacing: 2) {
+                    VStack(alignment: .leading, spacing: 4) {
                         Text("Total Assets")
                             .foregroundColor(.secondary)
                         
                         Text(totalAssets.formatted(.currency(code: "GBP")))
+                            .font(.title2)
+                            .fontWeight(.bold)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    // Net Worth
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Net Worth")
-                            .foregroundColor(.secondary)
-                        
-                        Text(totalNetWorth.formatted(.currency(code: "GBP")))
+                    // Total Debt (conditional)
+                    if hasAnyDebt {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
+                                .foregroundColor(.secondary)
+                            
+                            Text(totalDebt.formatted(.currency(code: "GBP")))
+                                .font(.title2)
+                                .fontWeight(.bold)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
             .background(Color.white)
-            .cornerRadius(12)
         }
     }
     

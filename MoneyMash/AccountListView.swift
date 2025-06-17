@@ -61,39 +61,21 @@ struct AccountListView: View {
                     .ignoresSafeArea()
                 }
                 
-                List {
-                    // Total Value Summary as first item
-                    Section {
-                        TotalValueView()
-                            .listRowInsets(EdgeInsets())
-                            .listRowBackground(Color.clear)
-                    }
-                    .listSectionSeparator(.hidden)
-                    
-                    // Financial Accounts Section
-                    Section {
-                        ForEach(sortedAccounts, id: \.self) { account in
-                            NavigationLink(destination: AccountDetailView(account: account)) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(account.type.rawValue)
-                                    Text("Provider: \(account.provider)")
-                                    HStack {
-                                        Text("Balance: \(account.currentBalance.formatted(.currency(code: "GBP")))")
-                                        
-                                        Spacer()
-                                        
-                                        Text(account.formattedLastUpdateDate.replacingOccurrences(of: "Last updated: ", with: ""))
-                                            .foregroundColor(.secondary)
-                                    }
-                                }
-                                .padding(.vertical, 2)
+                // Unified Scrolling Content
+                ScrollView {
+                    LazyVStack(spacing: 0) {
+                        // Financial Summary Header
+                        SummaryView()
+                        
+                        // Account Cards Section
+                        LazyVStack(spacing: 12) {
+                            ForEach(sortedAccounts, id: \.self) { account in
+                                AccountCardView(account: account)
                             }
-                            .listRowBackground(Color.white)
                         }
-                        .onDelete(perform: deleteAccounts)
+                        .padding()
                     }
                 }
-                .scrollContentBackground(.hidden)
             }
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -120,13 +102,6 @@ struct AccountListView: View {
         }
     }
     
-    private func deleteAccounts(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                context.delete(sortedAccounts[index])
-            }
-        }
-    }
     
     private func startGradientAnimation() {
         withAnimation(.linear(duration: 5).repeatForever(autoreverses: false)) {
