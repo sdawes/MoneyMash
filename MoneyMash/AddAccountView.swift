@@ -39,6 +39,7 @@ struct AddAccountView: View {
                 }
             }
             .navigationTitle("Add Account")
+            .toolbarTitleDisplayMode(.inline)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {

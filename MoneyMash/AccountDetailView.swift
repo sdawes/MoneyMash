@@ -35,7 +35,6 @@ struct AccountDetailView: View {
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Current Balance")
-                        .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     Text(account.currentBalance.formatted(.currency(code: "GBP")))
@@ -86,7 +85,6 @@ struct AccountDetailView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(update.formattedBalance)
-                                    .font(.subheadline)
                                     .fontWeight(.medium)
                                 
                                 Text(update.formattedDate)

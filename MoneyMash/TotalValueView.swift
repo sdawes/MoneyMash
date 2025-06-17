@@ -16,42 +16,31 @@ struct TotalValueView: View {
             // Total Debt
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Debt")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.secondary)
                 
                 Text(totalDebt.formatted(.currency(code: "GBP")))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(Color(red: 1.0, green: 0.8, blue: 0.9))
             }
             
             // Liquid Assets
             VStack(alignment: .leading, spacing: 2) {
                 Text("Liquid Assets")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.secondary)
                 
                 Text(liquidAssets.formatted(.currency(code: "GBP")))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.cyan)
             }
             
             // Total Net Worth
             VStack(alignment: .leading, spacing: 2) {
                 Text("Total Net Worth")
-                    .font(.subheadline)
-                    .foregroundColor(.white.opacity(0.8))
+                    .foregroundColor(.secondary)
                 
                 Text(totalNetWorth.formatted(.currency(code: "GBP")))
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(totalNetWorth >= 0 ? .white : .pink)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(red: 0.15, green: 0.35, blue: 0.45))
+        .background(Color.white)
+        .cornerRadius(12)
     }
     
     // MARK: - Calculations

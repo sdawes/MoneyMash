@@ -20,15 +20,15 @@ struct AccountListView: View {
     
     private var animatedColors: [Color] {
         let phase1Colors: [(Double, Double, Double)] = [
-            (0.9, 0.95, 0.92), (0.92, 0.94, 0.98), (0.94, 0.96, 0.98),
-            (0.93, 0.96, 0.94), (0.98, 0.98, 0.98), (0.91, 0.94, 0.97),
-            (0.90, 0.93, 0.96), (0.92, 0.95, 0.93), (0.93, 0.95, 0.97)
+            (0.94, 0.96, 0.98), (0.96, 0.97, 0.99), (0.95, 0.96, 0.98),
+            (0.97, 0.98, 0.99), (0.98, 0.99, 0.99), (0.96, 0.97, 0.98),
+            (0.95, 0.96, 0.97), (0.96, 0.97, 0.98), (0.97, 0.98, 0.99)
         ]
         
         let phase2Colors: [(Double, Double, Double)] = [
-            (0.85, 0.90, 0.95), (0.88, 0.91, 0.96), (0.90, 0.93, 0.97),
-            (0.87, 0.92, 0.96), (0.95, 0.95, 0.98), (0.89, 0.92, 0.97),
-            (0.86, 0.89, 0.94), (0.91, 0.94, 0.89), (0.88, 0.91, 0.96)
+            (0.93, 0.95, 0.97), (0.95, 0.96, 0.98), (0.94, 0.95, 0.97),
+            (0.96, 0.97, 0.98), (0.97, 0.98, 0.98), (0.95, 0.96, 0.97),
+            (0.94, 0.95, 0.96), (0.95, 0.96, 0.97), (0.96, 0.97, 0.98)
         ]
         
         // Interpolate between the two color sets based on animation phase
@@ -76,24 +76,19 @@ struct AccountListView: View {
                             NavigationLink(destination: AccountDetailView(account: account)) {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(account.type.rawValue)
-                                        .font(.headline)
                                     Text("Provider: \(account.provider)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
                                     HStack {
                                         Text("Balance: \(account.currentBalance.formatted(.currency(code: "GBP")))")
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
                                         
                                         Spacer()
                                         
                                         Text(account.formattedLastUpdateDate.replacingOccurrences(of: "Last updated: ", with: ""))
-                                            .font(.caption)
                                             .foregroundColor(.secondary)
                                     }
                                 }
                                 .padding(.vertical, 2)
                             }
+                            .listRowBackground(Color.white)
                         }
                         .onDelete(perform: deleteAccounts)
                     }
@@ -103,8 +98,6 @@ struct AccountListView: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Text("MoneyMash")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
