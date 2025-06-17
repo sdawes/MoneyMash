@@ -6,12 +6,15 @@
 //
 
 import SwiftUI
+import Charts
 
 struct AccountCardView: View {
     let account: FinancialAccount
+    @State private var showChart = false
     
     var body: some View {
-        NavigationLink(destination: AccountDetailView(account: account)) {
+        VStack(alignment: .leading, spacing: 0) {
+            // Main account details
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     VStack(alignment: .leading, spacing: 2) {
@@ -37,12 +40,40 @@ struct AccountCardView: View {
                             .foregroundColor(.secondary)
                     }
                 }
+                
+                // Chart toggle button
+                HStack {
+                    Spacer()
+                    Button(action: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showChart.toggle()
+                        }
+                    }) {
+                        HStack(spacing: 4) {
+                            Text("see chart")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                            
+                            Image(systemName: showChart ? "chevron.up" : "chevron.down")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
             }
             .padding()
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            
+            // Chart view (conditionally shown)
+            if showChart {
+                AccountChartView(account: account)
+                    .padding(.horizontal)
+                    .padding(.bottom)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
         }
-        .buttonStyle(PlainButtonStyle())
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }

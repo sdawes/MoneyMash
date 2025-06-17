@@ -70,7 +70,10 @@ struct AccountListView: View {
                         // Account Cards Section
                         LazyVStack(spacing: 12) {
                             ForEach(sortedAccounts, id: \.self) { account in
-                                AccountCardView(account: account)
+                                NavigationLink(destination: AccountDetailView(account: account)) {
+                                    AccountCardView(account: account)
+                                }
+                                .buttonStyle(PlainButtonStyle())
                             }
                         }
                         .padding()
