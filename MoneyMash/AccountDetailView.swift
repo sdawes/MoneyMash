@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SwiftData
+import Charts
 
 struct AccountDetailView: View {
     @Environment(\.modelContext) private var context
@@ -18,9 +19,11 @@ struct AccountDetailView: View {
     @State private var balanceString: String = ""
     @State private var showingError = false
     @State private var errorMessage = ""
+    @State private var showDeleteConfirmation = false
     
     var body: some View {
-        VStack(spacing: 0) {
+        ScrollView {
+            VStack(spacing: 16) {
             // Account Header
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 4) {
@@ -51,13 +54,15 @@ struct AccountDetailView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color.white)
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .padding(.horizontal)
             
             // Update Balance Form
             VStack(alignment: .leading, spacing: 8) {
                 Text("Update Balance")
                     .font(.headline)
-                    .padding(.horizontal)
                 
                 HStack {
                     TextField(balanceFieldLabel, text: $balanceString)
@@ -73,14 +78,24 @@ struct AccountDetailView: View {
                     .disabled(!isValidInput)
                     .buttonStyle(.borderedProminent)
                 }
-                .padding(.horizontal)
             }
-            .padding(.vertical)
+            .padding()
             .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+            .padding(.horizontal)
             
-            // Balance History List
-            List {
-                Section(header: Text("Balance History")) {
+            // Account Chart
+            AccountChartView(account: account)
+                .padding()
+                .background(Color.white)
+            
+            // Balance History
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Balance History")
+                    .font(.headline)
+                
+                LazyVStack(spacing: 8) {
                     ForEach(sortedUpdates, id: \.date) { update in
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
@@ -104,17 +119,40 @@ struct AccountDetailView: View {
                                     .cornerRadius(4)
                             }
                         }
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
                     }
                 }
+            }
+            .padding(.horizontal)
             }
         }
         .navigationTitle("Account Details")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button(action: {
+                    showDeleteConfirmation = true
+                }) {
+                    Image(systemName: "trash")
+                        .foregroundColor(.red)
+                }
+            }
+        }
         .alert("Error", isPresented: $showingError) {
             Button("OK") { }
         } message: {
             Text(errorMessage)
+        }
+        .alert("Delete Account", isPresented: $showDeleteConfirmation) {
+            Button("Delete", role: .destructive) {
+                deleteAccount()
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to delete this account? This action cannot be undone.")
         }
     }
     
@@ -148,6 +186,17 @@ struct AccountDetailView: View {
     }
     
     // MARK: - Helper Functions
+    
+    private func deleteAccount() {
+        context.delete(account)
+        do {
+            try context.save()
+            presentationMode.wrappedValue.dismiss()
+        } catch {
+            errorMessage = "Failed to delete account: \(error.localizedDescription)"
+            showingError = true
+        }
+    }
     
     private func updateBalance() {
         guard let rawBalance = parseCurrency(balanceString), rawBalance > 0 else {
