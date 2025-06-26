@@ -15,66 +15,66 @@ struct SummaryView: View {
     @State private var includeMortgage = true
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(alignment: .leading, spacing: 12) {
             // Toggle Controls
-            HStack {
-                if hasMixedDebt {
-                    Toggle("Include Mortgage in Debt", isOn: $includeMortgage)
+            VStack(spacing: 8) {
+                HStack {
+                    if hasMixedDebt {
+                        Toggle("Include Mortgage in Debt", isOn: $includeMortgage)
+                            .font(.caption)
+                        Spacer()
+                    }
+                    Toggle("Include Pensions in Wealth", isOn: $includePensions)
                         .font(.caption)
-                    Spacer()
-                }
-                Toggle("Include Pensions in Wealth", isOn: $includePensions)
-                    .font(.caption)
-                if !hasMixedDebt {
-                    Spacer()
+                    if !hasMixedDebt {
+                        Spacer()
+                    }
                 }
             }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
             
-            // Financial Summary Header (styled like Account Header)
-            VStack(alignment: .leading, spacing: 12) {
-                // Row 1: Net Worth (primary metric)
+            // Row 1: Net Worth (primary metric)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Net Worth")
+                    .foregroundColor(.secondary)
+                
+                Text(totalNetWorth.formatted(.currency(code: "GBP")))
+                    .font(.system(.largeTitle, weight: .bold))
+                    .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+            }
+            
+            // Row 2: Assets and Debt
+            HStack(spacing: 12) {
+                // Total Assets
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Net Worth")
+                    Text("Total Assets")
                         .foregroundColor(.secondary)
                     
-                    Text(totalNetWorth.formatted(.currency(code: "GBP")))
-                        .font(.system(.largeTitle, weight: .bold))
-                        .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+                    Text(totalAssets.formatted(.currency(code: "GBP")))
+                        .font(.title2)
+                        .fontWeight(.bold)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
-                // Row 2: Assets and Debt
-                HStack(spacing: 12) {
-                    // Total Assets
+                // Total Debt (conditional)
+                if hasAnyDebt {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Total Assets")
+                        Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
                             .foregroundColor(.secondary)
                         
-                        Text(totalAssets.formatted(.currency(code: "GBP")))
+                        Text(totalDebt.formatted(.currency(code: "GBP")))
                             .font(.title2)
                             .fontWeight(.bold)
+                            .foregroundColor(.red)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    
-                    // Total Debt (conditional)
-                    if hasAnyDebt {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
-                                .foregroundColor(.secondary)
-                            
-                            Text(totalDebt.formatted(.currency(code: "GBP")))
-                                .font(.title2)
-                                .fontWeight(.bold)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
                 }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding()
-            .background(Color.white)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding()
+        .background(Color.white)
+        .cornerRadius(12)
+        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
     
     // MARK: - Calculations

@@ -6,72 +6,66 @@
 //
 
 import SwiftUI
-import Charts
 
 struct AccountCardView: View {
     let account: FinancialAccount
-    @State private var showChart = false
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            // Main account details
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    HStack(spacing: 8) {
+                        Image(systemName: account.type.sfSymbol)
+                            .font(.title3)
+                            .foregroundColor(.blue)
+                            .frame(width: 20)
+                        
                         Text(account.type.rawValue)
                             .font(.headline)
                             .fontWeight(.semibold)
-                        
-                        Text("Provider: \(account.provider)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
                     }
                     
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text(account.currentBalance.formatted(.currency(code: "GBP")))
-                            .font(.title3)
-                            .fontWeight(.bold)
-                            .foregroundColor(account.currentBalance >= 0 ? .primary : .red)
-                        
-                        Text(account.formattedLastUpdateDate.replacingOccurrences(of: "Last updated: ", with: ""))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    Text("Provider: \(account.provider)")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
                 
-                // Chart toggle button
-                HStack {
-                    Spacer()
-                    Button(action: {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            showChart.toggle()
-                        }
-                    }) {
-                        HStack(spacing: 4) {
-                            Text("see chart")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(account.currentBalance.formatted(.currency(code: "GBP")))
+                        .font(.title3)
+                        .fontWeight(.bold)
+                        .foregroundColor(account.currentBalance >= 0 ? .primary : .red)
+                    
+                    // Monthly change indicator
+                    if account.monthlyChange != 0 {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            HStack(spacing: 4) {
+                                Image(systemName: account.trendDirection)
+                                    .font(.caption2)
+                                    .foregroundColor(account.isPositiveTrend ? .green : .red)
+                                
+                                Text("(\(account.formattedMonthlyChangePercentage))")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
                             
-                            Image(systemName: showChart ? "chevron.up" : "chevron.down")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                            Text(account.formattedMonthlyChange)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(account.isPositiveTrend ? .green : .red)
+                                .multilineTextAlignment(.trailing)
                         }
                     }
-                    .buttonStyle(PlainButtonStyle())
+                    
+                    Text(account.formattedLastUpdateDate.replacingOccurrences(of: "Last updated: ", with: ""))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
             }
-            .padding()
-            
-            // Chart view (conditionally shown)
-            if showChart {
-                AccountChartView(account: account)
-                    .padding(.horizontal)
-                    .padding(.bottom)
-                    .transition(.opacity.combined(with: .move(edge: .top)))
-            }
         }
+        .padding()
         .background(Color.white)
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)

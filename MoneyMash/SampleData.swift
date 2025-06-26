@@ -10,6 +10,8 @@ import SwiftData
 
 #if DEBUG
 struct SampleData {
+    // MARK: - Sample Data 1 (Original)
+    /*
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
@@ -107,6 +109,84 @@ struct SampleData {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
             let update = BalanceUpdate(balance: creditCard_AMEX_Balances[i], date: date, account: creditCard_AMEX)
             context.insert(update)
+        }
+        
+        // Save all changes
+        try? context.save()
+    }
+    */
+    
+    // MARK: - Sample Data 2 (Extended 3-Year History)
+    static func populateIfEmpty(context: ModelContext) {
+        // Check if we already have data
+        let fetchDescriptor = FetchDescriptor<FinancialAccount>()
+        let existingAccounts = (try? context.fetch(fetchDescriptor)) ?? []
+        
+        guard existingAccounts.isEmpty else { return }
+        
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Create test accounts with significant growth over 3 years
+        let pension = FinancialAccount(type: .pension, provider: "Vanguard")
+        let stocksISA = FinancialAccount(type: .stocksAndSharesISA, provider: "Trading 212")
+        let savings = FinancialAccount(type: .savingsAccount, provider: "Marcus")
+        let mortgage = FinancialAccount(type: .mortgage, provider: "Halifax")
+        let creditCard = FinancialAccount(type: .creditCard, provider: "Chase")
+        
+        let accounts = [pension, stocksISA, savings, mortgage, creditCard]
+        accounts.forEach { context.insert($0) }
+        
+        // Pension: 36 months of growth from £45K to £185K
+        let pensionBalances: [Decimal] = [
+            45000, 46200, 47800, 49100, 50500, 52000, 53800, 55200, 56900, 58400, 60100, 61800,
+            63500, 65400, 67200, 68900, 70800, 72500, 74400, 76200, 78100, 80000, 82100, 84000,
+            86200, 88400, 90700, 93000, 95500, 98000, 100800, 103500, 106400, 109200, 112300, 185000
+        ]
+        
+        // Stocks ISA: 36 months of volatile growth from £8K to £62K
+        let stocksBalances: [Decimal] = [
+            8000, 8200, 7800, 8500, 9200, 10100, 9600, 10800, 11500, 10900, 12400, 13200,
+            12800, 14100, 15600, 14900, 16800, 18200, 17500, 19400, 21100, 20300, 22800, 24500,
+            23800, 26200, 28900, 27600, 30800, 33500, 32100, 35400, 38700, 41200, 44800, 62000
+        ]
+        
+        // Savings: 36 months of steady growth from £25K to £145K
+        let savingsBalances: [Decimal] = [
+            25000, 28500, 32000, 35200, 38800, 42100, 45600, 49000, 52500, 55900, 59400, 62800,
+            66300, 69700, 73200, 76600, 80100, 83500, 87000, 90400, 93900, 97300, 100800, 104200,
+            107700, 111100, 114600, 118000, 121500, 124900, 128400, 131800, 135300, 138700, 142200, 145000
+        ]
+        
+        // Mortgage: 36 months of decreasing debt from £485K to £425K
+        let mortgageBalances: [Decimal] = [
+            -485000, -483200, -481500, -479700, -477900, -476200, -474400, -472600, -470900, -469100, -467300, -465600,
+            -463800, -462000, -460300, -458500, -456700, -455000, -453200, -451400, -449700, -447900, -446100, -444400,
+            -442600, -440800, -439100, -437300, -435500, -433800, -432000, -430200, -428500, -426700, -424900, -425000
+        ]
+        
+        // Credit Card: 36 months of fluctuating debt
+        let creditCardBalances: [Decimal] = [
+            -1200, -800, -1500, -2100, -900, -1800, -650, -2300, -1100, -1900, -750, -2500,
+            -1300, -2000, -850, -1600, -1400, -2200, -950, -1700, -1250, -2100, -600, -1800,
+            -1350, -2400, -800, -1500, -1150, -1900, -700, -2000, -1050, -1600, -900, -1200
+        ]
+        
+        // Create balance updates for each account
+        for i in 0..<36 {
+            let date = calendar.date(byAdding: .month, value: -(35 - i), to: now)!
+            
+            let pensionUpdate = BalanceUpdate(balance: pensionBalances[i], date: date, account: pension)
+            let stocksUpdate = BalanceUpdate(balance: stocksBalances[i], date: date, account: stocksISA)
+            let savingsUpdate = BalanceUpdate(balance: savingsBalances[i], date: date, account: savings)
+            let mortgageUpdate = BalanceUpdate(balance: mortgageBalances[i], date: date, account: mortgage)
+            let creditUpdate = BalanceUpdate(balance: creditCardBalances[i], date: date, account: creditCard)
+            
+            context.insert(pensionUpdate)
+            context.insert(stocksUpdate)
+            context.insert(savingsUpdate)
+            context.insert(mortgageUpdate)
+            context.insert(creditUpdate)
         }
         
         // Save all changes
