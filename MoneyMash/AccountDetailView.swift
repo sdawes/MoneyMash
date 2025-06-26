@@ -88,21 +88,26 @@ struct AccountDetailView: View {
             // Account Chart
             AccountChartView(account: account)
                 .padding()
-                .background(Color.white)
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+                .padding(.horizontal)
             
             // Balance History
             VStack(alignment: .leading, spacing: 8) {
                 Text("Balance History")
                     .font(.headline)
                 
-                LazyVStack(spacing: 8) {
-                    ForEach(sortedUpdates, id: \.date) { update in
+                VStack(spacing: 0) {
+                    ForEach(sortedUpdates.indices, id: \.self) { index in
+                        let update = sortedUpdates[index]
+                        
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(update.formattedBalance)
                                     .fontWeight(.medium)
                                 
-                                Text(update.formattedDate)
+                                Text("Updated on: \(update.formattedDate)")
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -119,13 +124,20 @@ struct AccountDetailView: View {
                                     .cornerRadius(4)
                             }
                         }
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
                         .padding(.horizontal)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
+                        
+                        if index < sortedUpdates.count - 1 {
+                            Divider()
+                                .padding(.horizontal)
+                        }
                     }
                 }
             }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
+            .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
             .padding(.horizontal)
             }
         }
