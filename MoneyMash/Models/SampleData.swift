@@ -116,7 +116,8 @@ struct SampleData {
     }
     */
     
-    // MARK: - Sample Data 2 (Extended 3-Year History)
+    // MARK: - Sample Data 2 (Extended 3-Year History) - COMMENTED OUT
+    /*
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
@@ -187,6 +188,67 @@ struct SampleData {
             context.insert(savingsUpdate)
             context.insert(mortgageUpdate)
             context.insert(creditUpdate)
+        }
+        
+        // Save all changes
+        try? context.save()
+    }
+    */
+    
+    // MARK: - Sample Data 3 (Real Portfolio Data)
+    static func populateIfEmpty(context: ModelContext) {
+        // Check if we already have data
+        let fetchDescriptor = FetchDescriptor<FinancialAccount>()
+        let existingAccounts = (try? context.fetch(fetchDescriptor)) ?? []
+        
+        guard existingAccounts.isEmpty else { return }
+        
+        let calendar = Calendar.current
+        
+        // Create accounts based on real portfolio
+        let monzoCashISA = FinancialAccount(type: .cashISA, provider: "Monzo")
+        let monzoSavings = FinancialAccount(type: .savingsAccount, provider: "Monzo")
+        let t212CashISA = FinancialAccount(type: .cashISA, provider: "Trading 212")
+        let t212StocksISA = FinancialAccount(type: .stocksAndSharesISA, provider: "Trading 212")
+        let hlSavings = FinancialAccount(type: .savingsAccount, provider: "HL")
+        let hlStocksISA = FinancialAccount(type: .stocksAndSharesISA, provider: "HL")
+        let hlPension = FinancialAccount(type: .pension, provider: "HL")
+        
+        let accounts = [monzoCashISA, monzoSavings, t212CashISA, t212StocksISA, hlSavings, hlStocksISA, hlPension]
+        accounts.forEach { context.insert($0) }
+        
+        // Real portfolio balances: 1 May 25, 1 Jun 25, 26 Jun 25
+        let monzoCashISABalances: [Decimal] = [18502.55, 18563.69, 18563.69]
+        let monzoSavingsBalances: [Decimal] = [59133.67, 59329.11, 53924.14]
+        let t212CashISABalances: [Decimal] = [21762.77, 21845.73, 21903.48]
+        let t212StocksISABalances: [Decimal] = [3695.32, 4230.95, 4286.20]
+        let hlSavingsBalances: [Decimal] = [44619.80, 44775.93, 44775.93]
+        let hlStocksISABalances: [Decimal] = [11826.95, 12045.36, 12242.74]
+        let hlPensionBalances: [Decimal] = [68048.48, 70900.09, 71838.17]
+        
+        // Create dates: 1 May 25, 1 Jun 25, 26 Jun 25
+        let dates = [
+            calendar.date(from: DateComponents(year: 2025, month: 5, day: 1))!,
+            calendar.date(from: DateComponents(year: 2025, month: 6, day: 1))!,
+            calendar.date(from: DateComponents(year: 2025, month: 6, day: 26))!
+        ]
+        
+        // Create balance updates for each account
+        let accountBalances = [
+            (monzoCashISA, monzoCashISABalances),
+            (monzoSavings, monzoSavingsBalances),
+            (t212CashISA, t212CashISABalances),
+            (t212StocksISA, t212StocksISABalances),
+            (hlSavings, hlSavingsBalances),
+            (hlStocksISA, hlStocksISABalances),
+            (hlPension, hlPensionBalances)
+        ]
+        
+        for (account, balances) in accountBalances {
+            for i in 0..<3 {
+                let update = BalanceUpdate(balance: balances[i], date: dates[i], account: account)
+                context.insert(update)
+            }
         }
         
         // Save all changes
