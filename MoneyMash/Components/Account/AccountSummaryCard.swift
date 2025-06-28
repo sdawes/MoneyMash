@@ -1,5 +1,5 @@
 //
-//  AccountHeaderCard.swift
+//  AccountSummaryCard.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AccountHeaderCard: View {
+struct AccountSummaryCard: View {
     let account: FinancialAccount
     
     var body: some View {

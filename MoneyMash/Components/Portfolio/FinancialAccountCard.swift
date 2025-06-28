@@ -1,5 +1,5 @@
 //
-//  AccountCardView.swift
+//  FinancialAccountCard.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AccountCardView: View {
+struct FinancialAccountCard: View {
     let account: FinancialAccount
     
     var body: some View {

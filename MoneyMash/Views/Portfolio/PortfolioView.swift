@@ -1,5 +1,5 @@
 //
-//  AccountListView.swift
+//  PortfolioView.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct AccountListView: View {
+struct PortfolioView: View {
     @Environment(\.modelContext) private var context
     @Query private var accounts: [FinancialAccount]
     
@@ -21,14 +21,14 @@ struct AccountListView: View {
             ScrollView {
                 LazyVStack(spacing: 0) {
                     // Financial Summary Header
-                    SummaryView()
+                    PortfolioSummaryCard()
                         .padding(.horizontal)
                     
                     // Account Cards Section
                     LazyVStack(spacing: 12) {
                         ForEach(sortedAccounts, id: \.self) { account in
                             NavigationLink(destination: AccountDetailView(account: account)) {
-                                AccountCardView(account: account)
+                                FinancialAccountCard(account: account)
                             }
                             .buttonStyle(PlainButtonStyle())
                         }

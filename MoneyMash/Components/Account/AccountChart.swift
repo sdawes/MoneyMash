@@ -1,5 +1,5 @@
 //
-//  AccountChartView.swift
+//  AccountChart.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import Charts
 
-struct AccountChartView: View {
+struct AccountChart: View {
     let account: FinancialAccount
     
     private var sortedBalanceUpdates: [BalanceUpdate] {

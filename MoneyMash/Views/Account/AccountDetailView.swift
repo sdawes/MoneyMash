@@ -23,13 +23,13 @@ struct AccountDetailView: View {
         ScrollView {
             VStack(spacing: 16) {
                 // Account Header
-                AccountHeaderCard(account: account)
+                AccountSummaryCard(account: account)
                 
                 // Update Balance Form
-                BalanceUpdateForm(account: account)
+                UpdateBalanceCard(account: account)
                 
                 // Account Chart
-                AccountChartView(account: account)
+                AccountChart(account: account)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(12)

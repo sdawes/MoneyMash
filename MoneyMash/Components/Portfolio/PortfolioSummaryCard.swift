@@ -1,5 +1,5 @@
 //
-//  SummaryView.swift
+//  PortfolioSummaryCard.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct SummaryView: View {
+struct PortfolioSummaryCard: View {
     @Query private var accounts: [FinancialAccount]
     
     @State private var includePensions = true

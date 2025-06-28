@@ -1,5 +1,5 @@
 //
-//  BalanceUpdateForm.swift
+//  UpdateBalanceCard.swift
 //  MoneyMash
 //
 //  Created by Stephen Dawes on 14/06/2025.
@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct BalanceUpdateForm: View {
+struct UpdateBalanceCard: View {
     @Environment(\.modelContext) private var context
     @Environment(\.presentationMode) var presentationMode
     
