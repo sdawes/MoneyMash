@@ -28,23 +28,37 @@ MoneyMash/
 │   ├── SampleData.swift       # Debug sample data population
 │   └── Theme.swift            # App theming and styling constants
 ├── Views/                      # Main application screens
-│   ├── Account/               # Account-related views
-│   │   ├── AccountListView.swift    # Main screen with summary and account cards
-│   │   ├── AccountDetailView.swift  # Individual account details
+│   ├── Portfolio/             # Portfolio overview and management
+│   │   ├── PortfolioView.swift      # Main portfolio screen with summary and account cards
 │   │   └── AddAccountView.swift     # New account creation form
-│   └── Summary/               # Summary-related views
-│       └── SummaryView.swift  # Net worth summary with controls
-├── Components/                 # Reusable UI components
-│   ├── Cards/                 # Card-based UI components
-│   │   ├── AccountCardView.swift      # Account display card
-│   │   ├── AccountHeaderCard.swift    # Account header with balance
-│   │   ├── BalanceHistoryCard.swift   # Balance history display
-│   │   └── BalanceUpdateForm.swift    # Balance update form
-│   └── Charts/                # Chart components
-│       └── AccountChartView.swift     # Swift Charts integration
+│   └── Account/               # Individual account details
+│       └── AccountDetailView.swift  # Account detail screen with charts and history
+├── Components/                 # Reusable UI components organized by feature
+│   ├── Portfolio/             # Portfolio-related components
+│   │   ├── PortfolioSummaryCard.swift    # Net worth summary with controls
+│   │   └── FinancialAccountCard.swift    # Individual account display card
+│   └── Account/               # Account detail components
+│       ├── AccountSummaryCard.swift      # Account header with balance info
+│       ├── UpdateBalanceCard.swift       # Balance update form
+│       ├── AccountChart.swift            # Swift Charts integration
+│       └── BalanceHistoryCard.swift      # Balance history display
 └── Resources/                  # Assets and resources
     └── Assets.xcassets/       # App icons, colors, and visual assets
 ```
+
+### **App Structure & Naming Conventions**
+
+**Portfolio**: The main overview screen showing all financial accounts
+- **PortfolioView**: Main screen with summary and account cards
+- **PortfolioSummaryCard**: Net worth summary with pension/mortgage toggles
+- **FinancialAccountCard**: Individual account preview cards
+
+**Account**: Individual account detail functionality
+- **AccountDetailView**: Detailed view for a single account
+- **AccountSummaryCard**: Account header with balance and last update
+- **UpdateBalanceCard**: Form for updating account balances
+- **AccountChart**: Swift Charts visualization of balance history
+- **BalanceHistoryCard**: List of historical balance updates
 
 ### **Data Models (SwiftData)**
 - **FinancialAccount**: Core account model with balance tracking and performance metrics
