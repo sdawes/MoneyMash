@@ -11,42 +11,40 @@ import SwiftData
 struct PortfolioSummaryCard: View {
     @Query private var accounts: [FinancialAccount]
     
-    @State private var includePensions = true
-    @State private var includeMortgage = true
+    @Binding var includePensions: Bool
+    @Binding var includeMortgage: Bool
+    @Binding var showingOptions: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Toggle Controls
-            VStack(spacing: 8) {
-                HStack {
-                    if hasMixedDebt {
-                        Toggle("Include Mortgage in Debt", isOn: $includeMortgage)
-                            .font(.caption)
-                        Spacer()
-                    }
-                    Toggle("Include Pensions in Wealth", isOn: $includePensions)
-                        .font(.caption)
-                    if !hasMixedDebt {
-                        Spacer()
-                    }
+        VStack(alignment: .leading, spacing: 8) {
+            // Row 1: Net Worth with options button in top right
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Net Worth")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    
+                    Text(totalNetWorth.formatted(.currency(code: "GBP")))
+                        .font(.system(.largeTitle, weight: .bold))
+                        .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
                 }
-            }
-            
-            // Row 1: Net Worth (primary metric)
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Net Worth")
-                    .foregroundColor(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 
-                Text(totalNetWorth.formatted(.currency(code: "GBP")))
-                    .font(.system(.largeTitle, weight: .bold))
-                    .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+                // Options button in top right
+                Button(action: { showingOptions.toggle() }) {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 2) // Slight adjustment to align with text
             }
             
-            // Row 2: Assets and Debt
-            HStack(spacing: 12) {
-                // Total Assets
+            // Row 2: Assets and Debt columns
+            HStack(spacing: 16) {
+                // Left Column: Total Assets
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total Assets")
+                        .font(.subheadline)
                         .foregroundColor(.secondary)
                     
                     Text(totalAssets.formatted(.currency(code: "GBP")))
@@ -55,10 +53,11 @@ struct PortfolioSummaryCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
-                // Total Debt (conditional)
+                // Right Column: Total Debt (conditional)
                 if hasAnyDebt {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
+                            .font(.subheadline)
                             .foregroundColor(.secondary)
                         
                         Text(totalDebt.formatted(.currency(code: "GBP")))
@@ -67,8 +66,15 @@ struct PortfolioSummaryCard: View {
                             .foregroundColor(.red)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                } else {
+                    // Empty space to maintain grid structure
+                    VStack {
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
                 }
             }
+            
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
