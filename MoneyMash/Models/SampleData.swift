@@ -10,8 +10,7 @@ import SwiftData
 
 #if DEBUG
 struct SampleData {
-    // MARK: - Sample Data 1 (Original)
-    /*
+    // MARK: - Sample Data 1 (Diverse Time Ranges) - ACTIVE
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
@@ -19,102 +18,175 @@ struct SampleData {
         
         guard existingAccounts.isEmpty else { return }
         
-        // Create accounts based on your actual portfolio
-        let cashISA_T212 = FinancialAccount(type: .cashISA, provider: "Trading 212")
-        let stocksISA_T212 = FinancialAccount(type: .stocksAndSharesISA, provider: "Trading 212")
-        let stocksISA_HL = FinancialAccount(type: .stocksAndSharesISA, provider: "HL")
-        let pension_HL = FinancialAccount(type: .pension, provider: "HL")
-        let savings_HL = FinancialAccount(type: .savingsAccount, provider: "HL")
-        let cashISA_Monzo = FinancialAccount(type: .cashISA, provider: "Monzo")
-        let savings_Monzo = FinancialAccount(type: .savingsAccount, provider: "Monzo")
-        let creditCard_Barclays = FinancialAccount(type: .creditCard, provider: "Barclays")
-        let creditCard_AMEX = FinancialAccount(type: .creditCard, provider: "AMEX")
-        
-        // Insert accounts
-        let accounts = [cashISA_T212, stocksISA_T212, stocksISA_HL, pension_HL, savings_HL, 
-                       cashISA_Monzo, savings_Monzo, creditCard_Barclays, creditCard_AMEX]
-        accounts.forEach { context.insert($0) }
-        
-        // Create historical balance updates
         let calendar = Calendar.current
         let now = Date()
         
-        // Cash ISA Trading 212 - Current: £21,881.80
-        let cashISA_T212_Balances: [Decimal] = [21881.80, 21456.23, 20998.76, 20123.45, 19785.67, 19234.89]
-        for i in 0..<6 {
+        // ACCOUNT 1: 5-Year Pension (60 months) - Major growth over time
+        let pension = FinancialAccount(type: .pension, provider: "Vanguard")
+        context.insert(pension)
+        
+        // Generate 60 months of pension data from £50K to £185K with realistic growth
+        var pensionBalances: [Decimal] = []
+        for i in 0..<60 {
+            let monthsFromStart = 60 - i - 1
+            let baseAmount: Decimal = 50000
+            let growthFactor = 1.0 + (Double(monthsFromStart) * 0.045) // 4.5% yearly growth
+            let variance = Double.random(in: 0.9...1.1) // ±10% variance
+            let balance = baseAmount * Decimal(growthFactor * variance)
+            pensionBalances.append(balance)
+        }
+        
+        for i in 0..<60 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: cashISA_T212_Balances[i], date: date, account: cashISA_T212)
+            let update = BalanceUpdate(balance: pensionBalances[i], date: date, account: pension)
             context.insert(update)
         }
         
-        // Stocks & Shares ISA Trading 212 - Current: £4,296.51
-        let stocksISA_T212_Balances: [Decimal] = [4296.51, 4089.34, 3876.23, 3654.12, 3423.78, 3198.45]
-        for i in 0..<6 {
+        // ACCOUNT 2: 3-Year Investment Account (36 months) - Volatile growth
+        let investmentAccount = FinancialAccount(type: .stocksAndSharesISA, provider: "Trading 212")
+        context.insert(investmentAccount)
+        
+        var investmentBalances: [Decimal] = []
+        for i in 0..<36 {
+            let monthsFromStart = 36 - i - 1
+            let baseAmount: Decimal = 15000
+            let trendGrowth = 1.0 + (Double(monthsFromStart) * 0.02) // 2% monthly trend
+            let volatility = Double.random(in: 0.8...1.3) // High volatility ±30%
+            let balance = baseAmount * Decimal(trendGrowth * volatility)
+            investmentBalances.append(balance)
+        }
+        
+        for i in 0..<36 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: stocksISA_T212_Balances[i], date: date, account: stocksISA_T212)
+            let update = BalanceUpdate(balance: investmentBalances[i], date: date, account: investmentAccount)
             context.insert(update)
         }
         
-        // Stocks & Shares ISA HL - Current: £12,259.78
-        let stocksISA_HL_Balances: [Decimal] = [12259.78, 11876.23, 11523.45, 11089.67, 10654.89, 10234.12]
-        for i in 0..<6 {
+        // ACCOUNT 3: 1-Year Savings Account (12 months) - Steady growth
+        let savingsAccount = FinancialAccount(type: .savingsAccount, provider: "Marcus")
+        context.insert(savingsAccount)
+        
+        var savingsBalances: [Decimal] = []
+        for i in 0..<12 {
+            let monthsFromStart = 12 - i - 1
+            let baseAmount: Decimal = 25000
+            let steadyGrowth = 1.0 + (Double(monthsFromStart) * 0.004) // 0.4% monthly (5% yearly)
+            let balance = baseAmount * Decimal(steadyGrowth)
+            savingsBalances.append(balance)
+        }
+        
+        for i in 0..<12 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: stocksISA_HL_Balances[i], date: date, account: stocksISA_HL)
+            let update = BalanceUpdate(balance: savingsBalances[i], date: date, account: savingsAccount)
             context.insert(update)
         }
         
-        // Pension HL - Current: £71,688
-        let pension_HL_Balances: [Decimal] = [71688.00, 70234.56, 68789.23, 67345.67, 65901.34, 64456.78]
-        for i in 0..<6 {
+        // ACCOUNT 4: 8-Month Cash ISA - Moderate range
+        let cashISA = FinancialAccount(type: .cashISA, provider: "Monzo")
+        context.insert(cashISA)
+        
+        let cashISABalances: [Decimal] = [
+            18750.25, 18456.78, 18123.45, 17890.12, 17654.89, 17345.67, 17012.34, 16789.01
+        ]
+        for i in 0..<8 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: pension_HL_Balances[i], date: date, account: pension_HL)
+            let update = BalanceUpdate(balance: cashISABalances[i], date: date, account: cashISA)
             context.insert(update)
         }
         
-        // Cash Savings HL - Current: £44,775.93
-        let savings_HL_Balances: [Decimal] = [44775.93, 43234.67, 41789.45, 40345.23, 38901.56, 37456.89]
-        for i in 0..<6 {
+        // ACCOUNT 5: 4-Month General Investment - Short term
+        let shortInvestment = FinancialAccount(type: .generalInvestmentAccount, provider: "HL")
+        context.insert(shortInvestment)
+        
+        let shortInvestmentBalances: [Decimal] = [6750.25, 6456.78, 6234.56, 6012.34]
+        for i in 0..<4 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: savings_HL_Balances[i], date: date, account: savings_HL)
+            let update = BalanceUpdate(balance: shortInvestmentBalances[i], date: date, account: shortInvestment)
             context.insert(update)
         }
         
-        // Cash ISA Monzo - Current: £18,563.69
-        let cashISA_Monzo_Balances: [Decimal] = [18563.69, 17234.45, 15876.23, 14567.89, 13234.56, 11901.23]
-        for i in 0..<6 {
+        // ACCOUNT 6: 2-Month Current Account - Very short term
+        let currentAccount = FinancialAccount(type: .currentAccount, provider: "Starling")
+        context.insert(currentAccount)
+        
+        let currentAccountBalances: [Decimal] = [3456.78, 3234.56]
+        for i in 0..<2 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: cashISA_Monzo_Balances[i], date: date, account: cashISA_Monzo)
+            let update = BalanceUpdate(balance: currentAccountBalances[i], date: date, account: currentAccount)
             context.insert(update)
         }
         
-        // Cash Savings Monzo - Current: £59,329.11
-        let savings_Monzo_Balances: [Decimal] = [59329.11, 57234.78, 55189.45, 53134.67, 51078.23, 49023.89]
+        // ACCOUNT 7: 6-Week Foreign Currency (Weekly updates) - Very granular
+        let foreignCurrency = FinancialAccount(type: .foreignCurrency, provider: "Wise")
+        context.insert(foreignCurrency)
+        
+        let foreignCurrencyBalances: [Decimal] = [
+            4250.50, 4187.25, 4123.75, 4089.50, 4045.25, 3998.75
+        ]
         for i in 0..<6 {
-            let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: savings_Monzo_Balances[i], date: date, account: savings_Monzo)
+            let date = calendar.date(byAdding: .weekOfYear, value: -i, to: now)!
+            let update = BalanceUpdate(balance: foreignCurrencyBalances[i], date: date, account: foreignCurrency)
             context.insert(update)
         }
         
-        // Credit Card Barclays - Current: £270.31 debt (negative)
-        let creditCard_Barclays_Balances: [Decimal] = [-270.31, -189.45, -345.67, -123.89, -456.78, -234.56]
-        for i in 0..<6 {
+        // ACCOUNT 8: 5-Year Mortgage (60 months) - Debt reduction over time
+        let mortgage = FinancialAccount(type: .mortgage, provider: "Halifax")
+        context.insert(mortgage)
+        
+        var mortgageBalances: [Decimal] = []
+        for i in 0..<60 {
+            let monthsFromStart = 60 - i - 1
+            let originalDebt: Decimal = -450000
+            let monthlyReduction: Decimal = 500 // £500 principal reduction per month
+            let balance = originalDebt + (Decimal(monthsFromStart) * monthlyReduction)
+            mortgageBalances.append(balance)
+        }
+        
+        for i in 0..<60 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: creditCard_Barclays_Balances[i], date: date, account: creditCard_Barclays)
+            let update = BalanceUpdate(balance: mortgageBalances[i], date: date, account: mortgage)
             context.insert(update)
         }
         
-        // Credit Card AMEX - Current: £650.18 debt (negative)
-        let creditCard_AMEX_Balances: [Decimal] = [-650.18, -567.89, -789.34, -423.67, -834.56, -612.45]
-        for i in 0..<6 {
+        // ACCOUNT 9: 18-Month Credit Card - Fluctuating debt
+        let creditCard = FinancialAccount(type: .creditCard, provider: "Chase")
+        context.insert(creditCard)
+        
+        var creditCardBalances: [Decimal] = []
+        for i in 0..<18 {
+            // Credit cards fluctuate between £200-£2000 debt
+            let variance = Double.random(in: -2000...(-200))
+            creditCardBalances.append(Decimal(variance))
+        }
+        
+        for i in 0..<18 {
             let date = calendar.date(byAdding: .month, value: -i, to: now)!
-            let update = BalanceUpdate(balance: creditCard_AMEX_Balances[i], date: date, account: creditCard_AMEX)
+            let update = BalanceUpdate(balance: creditCardBalances[i], date: date, account: creditCard)
+            context.insert(update)
+        }
+        
+        // ACCOUNT 10: 7-Year Junior ISA (84 months) - Very long term
+        let juniorISA = FinancialAccount(type: .juniorISA, provider: "Fidelity")
+        context.insert(juniorISA)
+        
+        var juniorISABalances: [Decimal] = []
+        for i in 0..<84 {
+            let monthsFromStart = 84 - i - 1
+            let baseAmount: Decimal = 2000
+            let compoundGrowth = pow(1.06, Double(monthsFromStart) / 12.0) // 6% yearly compound
+            let balance = baseAmount * Decimal(compoundGrowth)
+            juniorISABalances.append(balance)
+        }
+        
+        for i in 0..<84 {
+            let date = calendar.date(byAdding: .month, value: -i, to: now)!
+            let update = BalanceUpdate(balance: juniorISABalances[i], date: date, account: juniorISA)
             context.insert(update)
         }
         
         // Save all changes
         try? context.save()
     }
-    */
     
     // MARK: - Sample Data 2 (Extended 3-Year History) - COMMENTED OUT
     /*
@@ -195,7 +267,8 @@ struct SampleData {
     }
     */
     
-    // MARK: - Sample Data 3 (Real Portfolio Data)
+    // MARK: - Sample Data 3 (Real Portfolio Data) - COMMENTED OUT
+    /*
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
@@ -254,5 +327,6 @@ struct SampleData {
         // Save all changes
         try? context.save()
     }
+    */
 }
 #endif
