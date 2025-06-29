@@ -39,31 +39,20 @@ class FinancialAccount {
     
     // MARK: - Performance Metrics
     
-    var previousMonthBalance: Decimal? {
-        let calendar = Calendar.current
-        let oneMonthAgo = calendar.date(byAdding: .month, value: -1, to: Date()) ?? Date()
-        
-        // Find the balance update closest to one month ago
-        let sortedUpdates = balanceUpdates.sorted { $0.date < $1.date }
-        
-        for update in sortedUpdates.reversed() {
-            if update.date <= oneMonthAgo {
-                return update.balance
-            }
-        }
-        
-        // If no update found from a month ago, return the earliest balance
-        return sortedUpdates.first?.balance
+    var previousUpdateBalance: Decimal? {
+        let sortedUpdates = balanceUpdates.sorted { $0.date > $1.date }
+        // Return the second most recent balance (previous update)
+        return sortedUpdates.count > 1 ? sortedUpdates[1].balance : nil
     }
     
-    var monthlyChange: Decimal {
-        guard let previousBalance = previousMonthBalance else { return 0 }
+    var updateChange: Decimal {
+        guard let previousBalance = previousUpdateBalance else { return 0 }
         return currentBalance - previousBalance
     }
     
-    var monthlyChangePercentage: Double {
-        guard let previousBalance = previousMonthBalance, previousBalance != 0 else { return 0 }
-        let change = monthlyChange
+    var updateChangePercentage: Double {
+        guard let previousBalance = previousUpdateBalance, previousBalance != 0 else { return 0 }
+        let change = updateChange
         let percentage = change / previousBalance
         return NSDecimalNumber(decimal: percentage).doubleValue * 100
     }
@@ -80,40 +69,40 @@ class FinancialAccount {
     var isPositiveTrend: Bool {
         if isDebtAccount {
             // For debt accounts: positive trend when debt decreases (balance becomes less negative)
-            return monthlyChange > 0
+            return updateChange > 0
         } else {
             // For asset accounts: positive trend when balance increases
-            return monthlyChange > 0
+            return updateChange > 0
         }
     }
     
     var trendDirection: String {
         if isDebtAccount {
             // For debt accounts: down arrow for debt reduction (good), up arrow for debt increase (bad)
-            return monthlyChange > 0 ? "arrow.down.right" : "arrow.up.right"
+            return updateChange > 0 ? "arrow.down.right" : "arrow.up.right"
         } else {
             // For asset accounts: up arrow for increase (good), down arrow for decrease (bad)
-            return monthlyChange > 0 ? "arrow.up.right" : "arrow.down.right"
+            return updateChange > 0 ? "arrow.up.right" : "arrow.down.right"
         }
     }
     
-    var formattedMonthlyChange: String {
+    var formattedUpdateChange: String {
         if isDebtAccount {
-            if monthlyChange > 0 {
-                return "Debt reduced by \(monthlyChange.formatted(.currency(code: "GBP")))"
+            if updateChange > 0 {
+                return "Debt reduced by \(updateChange.formatted(.currency(code: "GBP")))"
             } else {
-                let increase = abs(monthlyChange)
+                let increase = abs(updateChange)
                 return "Debt increased by \(increase.formatted(.currency(code: "GBP")))"
             }
         } else {
-            let prefix = monthlyChange >= 0 ? "+" : ""
-            return "\(prefix)\(monthlyChange.formatted(.currency(code: "GBP")))"
+            let prefix = updateChange >= 0 ? "+" : ""
+            return "\(prefix)\(updateChange.formatted(.currency(code: "GBP")))"
         }
     }
     
-    var formattedMonthlyChangePercentage: String {
-        let prefix = monthlyChangePercentage >= 0 ? "+" : ""
-        return "\(prefix)\(monthlyChangePercentage.formatted(.number.precision(.fractionLength(1))))%"
+    var formattedUpdateChangePercentage: String {
+        let prefix = updateChangePercentage >= 0 ? "+" : ""
+        return "\(prefix)\(updateChangePercentage.formatted(.number.precision(.fractionLength(1))))%"
     }
 }
 

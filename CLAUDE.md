@@ -35,12 +35,14 @@ MoneyMash/
 │       └── AccountDetailView.swift  # Account detail screen with charts and history
 ├── Components/                 # Reusable UI components organized by feature
 │   ├── Portfolio/             # Portfolio-related components
-│   │   ├── PortfolioSummaryCard.swift    # Net worth summary with controls
-│   │   └── FinancialAccountCard.swift    # Individual account display card
+│   │   ├── PortfolioSummaryCard.swift    # Net worth summary with change indicators
+│   │   ├── PortfolioOptionsModal.swift   # Pension/mortgage toggle controls
+│   │   ├── FinancialAccountCard.swift    # Individual account display card
+│   │   └── ChangeIndicator.swift         # Reusable change display component
 │   └── Account/               # Account detail components
 │       ├── AccountSummaryCard.swift      # Account header with balance info
 │       ├── UpdateBalanceCard.swift       # Balance update form
-│       ├── AccountChart.swift            # Swift Charts integration
+│       ├── AccountChart.swift            # Swift Charts with dynamic scaling
 │       └── BalanceHistoryCard.swift      # Balance history display
 └── Resources/                  # Assets and resources
     └── Assets.xcassets/       # App icons, colors, and visual assets
@@ -70,9 +72,11 @@ MoneyMash/
 - Unified scrolling design throughout the app
 - Card-based UI with gray cards on white background
 - Smart debt vs asset account handling with contextual trend indicators
-- Monthly performance calculations with percentage changes
-- Interactive charts showing balance history over time
+- Update-based change calculations showing differences since last update
+- Interactive charts with dynamic Y-axis scaling and data-driven labeling
 - Net worth calculation with configurable pension/mortgage inclusion
+- Portfolio-wide change tracking since last account update
+- Dynamic SwiftCharts visualization with gradient fills and data points
 
 ### **Technical Stack**
 - SwiftUI for user interface framework
@@ -99,6 +103,89 @@ MoneyMash/
 - Unified scrolling experience across all views
 - NavigationLink cards maintain button styling
 - Consistent toolbar design with app title and add button
+
+## SwiftUI & SwiftData Best Practices
+
+**CRITICAL**: This project strictly adheres to Apple's recommended best practices for SwiftUI and SwiftData. Only deviate from these practices when there is a compelling technical reason and document the rationale.
+
+### **SwiftUI Best Practices**
+- **State Management**: Use `@State` for local component state, `@Binding` for shared state, `@Query` for SwiftData queries
+- **Component Architecture**: Follow single responsibility principle with focused, reusable components
+- **List Operations**: Use `ForEach` with SwiftUI's built-in `swipeActions` for delete functionality
+- **Navigation**: Use `NavigationStack` and `NavigationLink` for standard iOS navigation patterns
+- **Animations**: Wrap state changes with `withAnimation` for smooth transitions
+- **Modifiers**: Apply view modifiers in logical order (content → layout → styling → behavior)
+
+### **SwiftData Best Practices**
+- **Model Relationships**: Use `@Relationship` with appropriate `deleteRule` (cascade for dependent data)
+- **Data Operations**: Use `modelContext.delete()` and `modelContext.save()` for data persistence
+- **Query Management**: Leverage `@Query` for automatic UI updates when data changes
+- **Error Handling**: Always wrap save operations in do-catch blocks
+- **Performance**: Use computed properties for derived data rather than stored duplicates
+
+### **Implemented Patterns**
+- **Cascade Deletion**: FinancialAccount → BalanceUpdate relationship with `.cascade` delete rule
+- **Swipe-to-Delete**: Standard iOS pattern with confirmation dialog for destructive actions
+- **Modal Presentations**: Use `.confirmationDialog` for confirmations, custom overlays for contextual options
+- **Binding Communication**: Pass state between parent and child components using `@Binding`
+
+### **Data Integrity**
+- All financial calculations use `Decimal` for precision
+- Date handling uses proper `Calendar` and `DateFormatter` patterns
+- SwiftData relationships ensure referential integrity
+- Sample data provides realistic test scenarios
+
+## Change Calculation System
+
+### **Update-Based Change Logic**
+The app implements a sophisticated change tracking system that shows meaningful, update-based changes rather than arbitrary monthly calculations:
+
+**Individual Account Changes**: 
+- Show change since that specific account's last update
+- Uses `previousUpdateBalance` property to find the second-most-recent balance
+- Calculated via `updateChange` and `updateChangePercentage` properties
+
+**Portfolio Summary Changes**:
+- Shows changes since the last time ANY account was updated across the entire portfolio
+- Finds the most recent and second-most-recent update dates across all accounts
+- Calculates historical portfolio totals at both time points for comparison
+
+### **FinancialAccount Model Properties**
+- `previousUpdateBalance`: Second-most-recent balance for the account
+- `updateChange`: Decimal change since last update
+- `updateChangePercentage`: Percentage change since last update
+- `formattedUpdateChange`: User-friendly change display with proper debt logic
+- `formattedUpdateChangePercentage`: Formatted percentage with +/- prefix
+- `isPositiveTrend`: Smart logic (debt reduction = positive, asset growth = positive)
+- `trendDirection`: Appropriate SF Symbol arrow direction
+
+### **ChangeIndicator Component**
+Reusable UI component that displays:
+- Contextual color coding (green for positive, red for negative)
+- Appropriate arrow directions with SF Symbols
+- Handles zero changes with "No change" display
+- Supports both debt and asset account logic
+
+## SwiftCharts Integration
+
+### **Dynamic Chart Features**
+- **Dynamic Y-Axis Scaling**: Automatically calculates optimal Y-axis range based on data, avoiding unnecessary zero baselines
+- **Data-Driven X-Axis Labels**: Smart thinning algorithm shows actual data points rather than arbitrary calendar intervals
+- **Custom Domain Calculation**: Adds 10% padding above and below data range for better visualization
+- **Smart Baseline Logic**: Different gradient fill logic for debt vs asset accounts
+
+### **Chart Visual Design**
+- Subtle gradient fills (15% opacity) that don't overwhelm the data
+- Thin connecting lines (1pt width) with small data point dots
+- Proper gradient positioning to avoid covering X-axis labels
+- Years always displayed for temporal context regardless of time span
+
+### **Sample Data for Testing**
+Comprehensive sample data spanning:
+- 6 weeks to 7 years of history across 10 different accounts
+- Various account types (savings, investments, pensions, debt, foreign currency)
+- Realistic growth patterns, volatility, and debt reduction scenarios
+- Tests all chart labeling and scaling scenarios
 
 ## Development Notes
 

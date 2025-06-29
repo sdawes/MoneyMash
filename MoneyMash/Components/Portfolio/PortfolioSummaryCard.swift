@@ -27,6 +27,10 @@ struct PortfolioSummaryCard: View {
                     Text(totalNetWorth.formatted(.currency(code: "GBP")))
                         .font(.system(.largeTitle, weight: .bold))
                         .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+                    
+                    if hasChangeData {
+                        ChangeIndicator(change: netWorthChange, isDebtAccount: false)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -50,6 +54,10 @@ struct PortfolioSummaryCard: View {
                     Text(totalAssets.formatted(.currency(code: "GBP")))
                         .font(.title2)
                         .fontWeight(.bold)
+                    
+                    if hasChangeData {
+                        ChangeIndicator(change: totalAssetsChange, isDebtAccount: false)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 
@@ -64,6 +72,10 @@ struct PortfolioSummaryCard: View {
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.red)
+                        
+                        if hasChangeData {
+                            ChangeIndicator(change: totalDebtChange, isDebtAccount: true)
+                        }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 } else {
@@ -100,6 +112,90 @@ struct PortfolioSummaryCard: View {
             .reduce(0) { total, account in
                 total + account.currentBalance
             }
+    }
+    
+    // MARK: - Change Tracking
+    
+    private var mostRecentUpdateDate: Date? {
+        accounts.compactMap { $0.lastUpdateDate }.max()
+    }
+    
+    private var previousUpdateDate: Date? {
+        guard let mostRecentDate = mostRecentUpdateDate else { return nil }
+        
+        // Find all update dates except the most recent
+        let allUpdateDates = accounts.flatMap { account in
+            account.balanceUpdates.map { $0.date }
+        }.filter { $0 != mostRecentDate }
+        
+        return allUpdateDates.max()
+    }
+    
+    private func getBalanceAt(date: Date, for account: FinancialAccount) -> Decimal {
+        // Find the most recent balance update at or before the given date
+        let updatesAtOrBefore = account.balanceUpdates
+            .filter { $0.date <= date }
+            .sorted { $0.date > $1.date }
+        
+        return updatesAtOrBefore.first?.balance ?? 0
+    }
+    
+    private var previousNetWorth: Decimal {
+        guard let previousDate = previousUpdateDate else { return totalNetWorth }
+        
+        return accounts
+            .filter { account in
+                // Same filtering logic as current net worth
+                if isDebtAccount(account.type) {
+                    return account.type != .mortgage || includeMortgage
+                } else {
+                    return shouldIncludeInAssets(account.type)
+                }
+            }
+            .reduce(0) { total, account in
+                total + getBalanceAt(date: previousDate, for: account)
+            }
+    }
+    
+    private var previousTotalAssets: Decimal {
+        guard let previousDate = previousUpdateDate else { return totalAssets }
+        
+        return accounts
+            .filter { shouldIncludeInAssets($0.type) }
+            .reduce(0) { total, account in
+                total + getBalanceAt(date: previousDate, for: account)
+            }
+    }
+    
+    private var previousTotalDebt: Decimal {
+        guard let previousDate = previousUpdateDate else { return totalDebt }
+        
+        return accounts
+            .filter { account in
+                if hasOnlyMortgage {
+                    return isDebtAccount(account.type)
+                }
+                return isDebtAccount(account.type) && (account.type != .mortgage || includeMortgage)
+            }
+            .reduce(0) { total, account in
+                total + getBalanceAt(date: previousDate, for: account)
+            }
+    }
+    
+    private var netWorthChange: Decimal {
+        totalNetWorth - previousNetWorth
+    }
+    
+    private var totalAssetsChange: Decimal {
+        totalAssets - previousTotalAssets
+    }
+    
+    private var totalDebtChange: Decimal {
+        totalDebt - previousTotalDebt
+    }
+    
+    private var hasChangeData: Bool {
+        previousUpdateDate != nil
     }
     
     private var totalAssets: Decimal {

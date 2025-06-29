@@ -38,20 +38,20 @@ struct FinancialAccountCard: View {
                         .fontWeight(.bold)
                         .foregroundColor(account.currentBalance >= 0 ? .primary : .red)
                     
-                    // Monthly change indicator
-                    if account.monthlyChange != 0 {
+                    // Change indicator since last update
+                    if account.updateChange != 0 {
                         VStack(alignment: .trailing, spacing: 2) {
                             HStack(spacing: 4) {
                                 Image(systemName: account.trendDirection)
                                     .font(.caption2)
                                     .foregroundColor(account.isPositiveTrend ? .green : .red)
                                 
-                                Text("(\(account.formattedMonthlyChangePercentage))")
+                                Text("(\(account.formattedUpdateChangePercentage))")
                                     .font(.caption2)
                                     .foregroundColor(.secondary)
                             }
                             
-                            Text(account.formattedMonthlyChange)
+                            Text(account.formattedUpdateChange)
                                 .font(.caption)
                                 .fontWeight(.medium)
                                 .foregroundColor(account.isPositiveTrend ? .green : .red)
