@@ -10,9 +10,19 @@ import Charts
 
 struct AccountChart: View {
     let account: FinancialAccount
+    @Binding var selectedTimePeriod: ChartTimePeriod
+    @Binding var showingTimeFilter: Bool
     
     private var sortedBalanceUpdates: [BalanceUpdate] {
-        account.balanceUpdates.sorted { $0.date < $1.date }
+        let allUpdates = account.balanceUpdates.sorted { $0.date < $1.date }
+        
+        // Filter by selected time period
+        guard let days = selectedTimePeriod.days else {
+            return allUpdates // Return all data for "Max"
+        }
+        
+        let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        return allUpdates.filter { $0.date >= cutoffDate }
     }
     
     private var dataTimeSpanInMonths: Int {
@@ -184,9 +194,31 @@ struct AccountChart: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Balance History")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            // Chart header with filter badge and options button
+            HStack {
+                // Current filter badge
+                Text(selectedTimePeriod.rawValue)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.blue.opacity(0.1))
+                    .foregroundColor(.blue)
+                    .cornerRadius(6)
+                
+                Spacer()
+                
+                // Time filter options button
+                Button(action: { 
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        showingTimeFilter.toggle()
+                    }
+                }) {
+                    Image(systemName: "ellipsis.circle")
+                        .font(.title3)
+                        .foregroundColor(.secondary)
+                }
+            }
             
             if sortedBalanceUpdates.isEmpty {
                 Text("No historical data available")
