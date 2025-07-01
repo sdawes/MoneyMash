@@ -125,38 +125,4 @@ enum AccountType: String, CaseIterable, Identifiable, Codable {
 
     var id: String { self.rawValue }
     
-    var sfSymbol: String {
-        switch self {
-        case .currentAccount:
-            return "creditcard"
-        case .savingsAccount:
-            return "banknote"
-        case .cashISA:
-            return "banknote.fill"
-        case .stocksAndSharesISA:
-            return "chart.line.uptrend.xyaxis"
-        case .lifetimeISA:
-            return "house.fill"
-        case .generalInvestmentAccount:
-            return "chart.pie.fill"
-        case .pension:
-            return "person.2.fill"
-        case .juniorISA:
-            return "figure.child"
-        case .juniorSIPP:
-            return "graduationcap.fill"
-        case .mortgage:
-            return "house"
-        case .loan:
-            return "doc.text"
-        case .creditCard:
-            return "creditcard.fill"
-        case .crypto:
-            return "bitcoinsign.circle.fill"
-        case .foreignCurrency:
-            return "dollarsign.circle"
-        case .cash:
-            return "banknote"
-        }
-    }
 }

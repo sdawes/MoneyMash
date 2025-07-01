@@ -46,7 +46,7 @@ struct PortfolioView: View {
             }
             .background(Color.white)
             .overlay(
-                // Portfolio Options Modal overlay - floats above everything
+                // Portfolio Options Modal overlay
                 Group {
                     if showingPortfolioOptions {
                         ZStack {
@@ -68,7 +68,7 @@ struct PortfolioView: View {
                                         includeMortgage: $includeMortgage,
                                         isPresented: $showingPortfolioOptions
                                     )
-                                    .offset(x: -16, y: 50) // Position below top-right icon
+                                    .offset(x: -16, y: 50)
                                 }
                                 Spacer()
                             }
@@ -78,7 +78,6 @@ struct PortfolioView: View {
                             ))
                         }
                         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingPortfolioOptions)
-                        .zIndex(1000) // Ensure it floats above everything
                     }
                 }
                 .allowsHitTesting(showingPortfolioOptions)

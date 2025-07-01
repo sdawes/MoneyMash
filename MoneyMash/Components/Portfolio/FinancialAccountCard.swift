@@ -15,10 +15,7 @@ struct FinancialAccountCard: View {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     HStack(spacing: 8) {
-                        Image(systemName: account.type.sfSymbol)
-                            .font(.title3)
-                            .foregroundColor(.blue)
-                            .frame(width: 20)
+                        AccountIcon(accountType: account.type)
                         
                         Text(account.type.rawValue)
                             .font(.headline)
