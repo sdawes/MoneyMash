@@ -69,21 +69,21 @@ extension AccountType {
     var circleColor: Color {
         switch self {
         case .currentAccount, .savingsAccount, .cashISA:
-            return .blue.opacity(0.15)
+            return ColorTheme.bankingBlue.opacity(0.2)
         case .stocksAndSharesISA, .generalInvestmentAccount:
-            return .green.opacity(0.15)
+            return ColorTheme.investmentGreen.opacity(0.2)
         case .lifetimeISA, .mortgage:
-            return .orange.opacity(0.15)
+            return ColorTheme.propertyOrange.opacity(0.2)
         case .pension, .juniorISA, .juniorSIPP:
-            return .purple.opacity(0.15)
+            return ColorTheme.pensionPurple.opacity(0.2)
         case .loan, .creditCard:
-            return .red.opacity(0.15)
+            return ColorTheme.debtIconRed.opacity(0.2)
         case .crypto:
-            return .yellow.opacity(0.15)
+            return ColorTheme.cryptoYellow.opacity(0.2)
         case .foreignCurrency:
-            return .teal.opacity(0.15)
+            return ColorTheme.foreignTeal.opacity(0.2)
         case .cash:
-            return .gray.opacity(0.15)
+            return ColorTheme.cashGray.opacity(0.2)
         }
     }
 }

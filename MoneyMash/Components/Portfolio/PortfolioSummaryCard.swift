@@ -22,11 +22,11 @@ struct PortfolioSummaryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Net Worth")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.8))
                     
                     Text(totalNetWorth.formatted(.currency(code: "GBP")))
                         .font(.system(.largeTitle, weight: .bold))
-                        .foregroundColor(totalNetWorth >= 0 ? .primary : .red)
+                        .foregroundColor(.white)
                     
                     if hasChangeData {
                         ChangeIndicator(change: netWorthChange, isDebtAccount: false)
@@ -38,7 +38,7 @@ struct PortfolioSummaryCard: View {
                 Button(action: { showingOptions.toggle() }) {
                     Image(systemName: "ellipsis.circle")
                         .font(.title3)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.8))
                 }
                 .padding(.top, 2) // Slight adjustment to align with text
             }
@@ -49,11 +49,12 @@ struct PortfolioSummaryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total Assets")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(.white.opacity(0.8))
                     
                     Text(totalAssets.formatted(.currency(code: "GBP")))
                         .font(.title2)
                         .fontWeight(.bold)
+                        .foregroundColor(.white)
                     
                     if hasChangeData {
                         ChangeIndicator(change: totalAssetsChange, isDebtAccount: false)
@@ -66,12 +67,12 @@ struct PortfolioSummaryCard: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(.white.opacity(0.8))
                         
                         Text(totalDebt.formatted(.currency(code: "GBP")))
-                            .font(.title2)
-                            .fontWeight(.bold)
-                            .foregroundColor(.red)
+                            .font(.title3)
+                            .fontWeight(.semibold)
+                            .foregroundColor(ColorTheme.debtRed)
                         
                         if hasChangeData {
                             ChangeIndicator(change: totalDebtChange, isDebtAccount: true)
@@ -90,9 +91,9 @@ struct PortfolioSummaryCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(Color(.systemGray6))
+        .background(ColorTheme.navyGradient)
         .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
+        .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }
     
     // MARK: - Calculations
