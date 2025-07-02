@@ -8,16 +8,22 @@
 import SwiftUI
 
 struct ColorTheme {
-    // MARK: - Primary Navy Blue Theme
+    // MARK: - Custom Gradient Colors
     
-    /// Deep Navy Blue - Primary brand color
-    static let primaryNavy = Color(hex: "#1B2951")
+    /// Deep navy base
+    static let deepNavy = Color(hex: "#07246D")
     
-    /// Rich Navy Blue - Slightly lighter for gradients
-    static let secondaryNavy = Color(hex: "#2A3A6B")
+    /// Rich blue primary
+    static let richBlue = Color(hex: "#2048C5")
     
-    /// Light Navy Blue - For subtle accents
-    static let lightNavy = Color(hex: "#3D4F85")
+    /// Bright cyan accent
+    static let brightCyan = Color(hex: "#00A7C9")
+    
+    /// Medium blue
+    static let mediumBlue = Color(hex: "#0067A2")
+    
+    /// Light cyan
+    static let lightCyan = Color(hex: "#00ADCB")
     
     // MARK: - Semantic Colors
     
@@ -52,18 +58,34 @@ struct ColorTheme {
     
     // MARK: - Gradient Definitions
     
-    /// Primary navy gradient - similar to Monzo's red-orange gradient
+    /// Primary gradient - deep navy to bright cyan
     static let navyGradient = LinearGradient(
-        colors: [primaryNavy, secondaryNavy],
+        colors: [deepNavy, richBlue, brightCyan],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
     )
     
-    /// Enhanced navy gradient with more depth
+    /// Enhanced multi-color gradient
     static let deepNavyGradient = LinearGradient(
-        colors: [primaryNavy, secondaryNavy, lightNavy],
+        colors: [deepNavy, richBlue, mediumBlue, lightCyan],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
+    )
+    
+    /// Radial highlight overlay
+    static let radialNavyGradient = RadialGradient(
+        colors: [lightCyan.opacity(0.3), Color.clear],
+        center: .bottomTrailing,
+        startRadius: 50,
+        endRadius: 250
+    )
+    
+    /// Shadow radial for depth
+    static let shadowRadialGradient = RadialGradient(
+        colors: [Color.clear, deepNavy.opacity(0.4)],
+        center: .topLeading,
+        startRadius: 100,
+        endRadius: 300
     )
 }
 

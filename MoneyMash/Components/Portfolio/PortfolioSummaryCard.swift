@@ -22,7 +22,7 @@ struct PortfolioSummaryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Net Worth")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white)
                     
                     Text(totalNetWorth.formatted(.currency(code: "GBP")))
                         .font(.system(.largeTitle, weight: .bold))
@@ -38,7 +38,7 @@ struct PortfolioSummaryCard: View {
                 Button(action: { showingOptions.toggle() }) {
                     Image(systemName: "ellipsis.circle")
                         .font(.title3)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white)
                 }
                 .padding(.top, 2) // Slight adjustment to align with text
             }
@@ -49,7 +49,7 @@ struct PortfolioSummaryCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Total Assets")
                         .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.8))
+                        .foregroundColor(.white)
                     
                     Text(totalAssets.formatted(.currency(code: "GBP")))
                         .font(.title2)
@@ -67,7 +67,7 @@ struct PortfolioSummaryCard: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(hasOnlyMortgage ? "Mortgage" : "Total Debt")
                             .font(.subheadline)
-                            .foregroundColor(.white.opacity(0.8))
+                            .foregroundColor(.white)
                         
                         Text(totalDebt.formatted(.currency(code: "GBP")))
                             .font(.title3)
@@ -91,7 +91,20 @@ struct PortfolioSummaryCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
-        .background(ColorTheme.navyGradient)
+        .background(
+            ZStack {
+                // Base gradient - dark navy to bright cyan
+                ColorTheme.navyGradient
+                
+                // Highlight radial gradient
+                ColorTheme.radialNavyGradient
+                    .blendMode(.screen)
+                
+                // Shadow radial gradient for depth
+                ColorTheme.shadowRadialGradient
+                    .blendMode(.multiply)
+            }
+        )
         .cornerRadius(12)
         .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
     }

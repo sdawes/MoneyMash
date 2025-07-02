@@ -48,7 +48,7 @@ struct ChangeIndicator: View {
         if change == 0 {
             Text("No change")
                 .font(.caption2)
-                .foregroundColor(.secondary)
+                .foregroundColor(.white.opacity(0.5))
         } else {
             HStack(spacing: 3) {
                 Image(systemName: changeIcon)
