@@ -97,7 +97,27 @@ enum ChartTimePeriod: String, CaseIterable {
         }
     }
     
-    // Generate evenly spaced x-axis mark dates for this time period
+    // SwiftUI Charts stride configuration for time periods
+    var axisStride: (component: Calendar.Component, count: Int) {
+        switch self {
+        case .oneDay:
+            return (.hour, 6) // Every 6 hours
+        case .oneWeek:
+            return (.day, 1) // Daily
+        case .oneMonth:
+            return (.day, 7) // Weekly  
+        case .threeMonths:
+            return (.day, 14) // Bi-weekly
+        case .oneYear:
+            return (.month, 2) // Every 2 months
+        case .fiveYears:
+            return (.year, 1) // Yearly
+        case .max:
+            return (.month, 1) // Default - not used for max
+        }
+    }
+    
+    // Generate evenly spaced x-axis mark dates for fallback (max period)
     func generateXAxisDates() -> [Date] {
         guard self != .max else { return [] } // Let max handle this differently
         

@@ -295,16 +295,31 @@ struct AccountChart: View {
                 }
                 .frame(height: 120)
                 .chartXAxis {
-                    // Data-driven approach: show actual data points with smart thinning
-                    AxisMarks(values: selectedDataPoints) { value in
-                        AxisValueLabel {
-                            if let date = value.as(Date.self) {
-                                Text(formatDateLabel(for: date, monthsSpan: dataTimeSpanInMonths))
-                                    .font(.caption2)
-                                    .multilineTextAlignment(.center)
+                    if selectedTimePeriod == .max {
+                        // For max period, use smart thinning of actual data
+                        AxisMarks(values: selectedDataPoints) { value in
+                            AxisValueLabel {
+                                if let date = value.as(Date.self) {
+                                    Text(formatDateLabel(for: date, monthsSpan: dataTimeSpanInMonths))
+                                        .font(.caption2)
+                                        .multilineTextAlignment(.center)
+                                }
                             }
+                            AxisGridLine()
                         }
-                        AxisGridLine()
+                    } else {
+                        // Use SwiftUI Charts built-in stride for time periods
+                        let stride = selectedTimePeriod.axisStride
+                        AxisMarks(values: .stride(by: stride.component, count: stride.count)) { value in
+                            AxisValueLabel {
+                                if let date = value.as(Date.self) {
+                                    Text(formatDateLabel(for: date, monthsSpan: dataTimeSpanInMonths))
+                                        .font(.caption2)
+                                        .multilineTextAlignment(.center)
+                                }
+                            }
+                            AxisGridLine()
+                        }
                     }
                 }
                 .chartYAxis {
