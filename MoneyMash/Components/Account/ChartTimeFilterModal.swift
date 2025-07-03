@@ -97,50 +97,26 @@ enum ChartTimePeriod: String, CaseIterable {
         }
     }
     
-    // Generate x-axis mark dates for this time period
+    // Generate evenly spaced x-axis mark dates for this time period
     func generateXAxisDates() -> [Date] {
         guard self != .max else { return [] } // Let max handle this differently
         
-        let calendar = Calendar.current
-        let interval = xAxisInterval
+        let periodStart = startDate
+        let periodEnd = endDate
         let count = xAxisIntervalCount
         
-        var dates: [Date] = []
-        let intervalValue = -(count - 1)
+        // Calculate the total time span in seconds
+        let totalSeconds = periodEnd.timeIntervalSince(periodStart)
         
-        switch interval {
-        case .hour:
-            for i in 0..<count {
-                if let date = calendar.date(byAdding: .hour, value: intervalValue + (i * 6), to: endDate) {
-                    dates.append(date)
-                }
-            }
-        case .day:
-            for i in 0..<count {
-                if let date = calendar.date(byAdding: .day, value: intervalValue + i, to: endDate) {
-                    dates.append(date)
-                }
-            }
-        case .weekOfYear:
-            for i in 0..<count {
-                if let date = calendar.date(byAdding: .weekOfYear, value: intervalValue + i, to: endDate) {
-                    dates.append(date)
-                }
-            }
-        case .month:
-            for i in 0..<count {
-                if let date = calendar.date(byAdding: .month, value: intervalValue + i, to: endDate) {
-                    dates.append(date)
-                }
-            }
-        case .year:
-            for i in 0..<count {
-                if let date = calendar.date(byAdding: .year, value: intervalValue + i, to: endDate) {
-                    dates.append(date)
-                }
-            }
-        default:
-            break
+        // Divide by count-1 to get intervals between count points
+        let intervalSeconds = totalSeconds / Double(Swift.max(1, count - 1))
+        
+        var dates: [Date] = []
+        
+        // Generate evenly spaced dates
+        for i in 0..<count {
+            let date = periodStart.addingTimeInterval(Double(i) * intervalSeconds)
+            dates.append(date)
         }
         
         return dates
