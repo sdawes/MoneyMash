@@ -39,6 +39,112 @@ enum ChartTimePeriod: String, CaseIterable {
         case .max: return "All Time"
         }
     }
+    
+    // Get the start date for this time period (going back from today)
+    var startDate: Date {
+        guard let days = days else {
+            // For "Max", return a very early date
+            return Calendar.current.date(byAdding: .year, value: -10, to: Date()) ?? Date()
+        }
+        return Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+    }
+    
+    // Get the end date for this time period (always today)
+    var endDate: Date {
+        return Date()
+    }
+    
+    // Get the full date range for this time period
+    var dateRange: ClosedRange<Date> {
+        return startDate...endDate
+    }
+    
+    // Get appropriate x-axis interval for this time period
+    var xAxisInterval: Calendar.Component {
+        switch self {
+        case .oneDay:
+            return .hour
+        case .oneWeek:
+            return .day
+        case .oneMonth:
+            return .weekOfYear
+        case .threeMonths:
+            return .weekOfYear
+        case .oneYear:
+            return .month
+        case .fiveYears, .max:
+            return .year
+        }
+    }
+    
+    // Get the number of intervals for x-axis marks
+    var xAxisIntervalCount: Int {
+        switch self {
+        case .oneDay:
+            return 4 // Every 6 hours
+        case .oneWeek:
+            return 7 // Daily
+        case .oneMonth:
+            return 4 // Weekly
+        case .threeMonths:
+            return 6 // Bi-weekly
+        case .oneYear:
+            return 12 // Monthly
+        case .fiveYears:
+            return 5 // Yearly
+        case .max:
+            return 10 // Distributed across all data
+        }
+    }
+    
+    // Generate x-axis mark dates for this time period
+    func generateXAxisDates() -> [Date] {
+        guard self != .max else { return [] } // Let max handle this differently
+        
+        let calendar = Calendar.current
+        let interval = xAxisInterval
+        let count = xAxisIntervalCount
+        
+        var dates: [Date] = []
+        let intervalValue = -(count - 1)
+        
+        switch interval {
+        case .hour:
+            for i in 0..<count {
+                if let date = calendar.date(byAdding: .hour, value: intervalValue + (i * 6), to: endDate) {
+                    dates.append(date)
+                }
+            }
+        case .day:
+            for i in 0..<count {
+                if let date = calendar.date(byAdding: .day, value: intervalValue + i, to: endDate) {
+                    dates.append(date)
+                }
+            }
+        case .weekOfYear:
+            for i in 0..<count {
+                if let date = calendar.date(byAdding: .weekOfYear, value: intervalValue + i, to: endDate) {
+                    dates.append(date)
+                }
+            }
+        case .month:
+            for i in 0..<count {
+                if let date = calendar.date(byAdding: .month, value: intervalValue + i, to: endDate) {
+                    dates.append(date)
+                }
+            }
+        case .year:
+            for i in 0..<count {
+                if let date = calendar.date(byAdding: .year, value: intervalValue + i, to: endDate) {
+                    dates.append(date)
+                }
+            }
+        default:
+            break
+        }
+        
+        return dates
+    }
 }
 
 struct ChartTimeFilterModal: View {

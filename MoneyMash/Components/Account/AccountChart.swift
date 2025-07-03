@@ -46,61 +46,60 @@ struct AccountChart: View {
     }
     
     private var selectedDataPoints: [Date] {
-        let allDates = sortedBalanceUpdates.map { $0.date }
-        let dataPointCount = allDates.count
+        // Use time period aware x-axis dates for consistent display
+        let generatedDates = selectedTimePeriod.generateXAxisDates()
         
-        // Smart thinning based on number of data points
-        switch dataPointCount {
-        case 0...6:
-            // Show all data points (6 or fewer)
-            return allDates
-        case 7...12:
-            // Show every other point (7-12 data points)
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 2 == 0 ? date : nil
-            })
-        case 13...24:
-            // Show every 3rd point (13-24 data points) 
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 3 == 0 ? date : nil
-            })
-        case 25...60:
-            // Show every 6th point (25-60 data points)
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 6 == 0 ? date : nil
-            })
-        default:
-            // Show every 12th point (60+ data points)
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 12 == 0 ? date : nil
-            })
+        // For "Max" period, fall back to smart thinning of actual data
+        if selectedTimePeriod == .max {
+            let allDates = sortedBalanceUpdates.map { $0.date }
+            let dataPointCount = allDates.count
+            
+            switch dataPointCount {
+            case 0...6:
+                return allDates
+            case 7...12:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 2 == 0 ? date : nil
+                })
+            case 13...24:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 3 == 0 ? date : nil
+                })
+            case 25...60:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 6 == 0 ? date : nil
+                })
+            default:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 12 == 0 ? date : nil
+                })
+            }
         }
+        
+        return generatedDates
     }
     
     private func formatDateLabel(for date: Date, monthsSpan: Int) -> String {
-        let dataPointCount = sortedBalanceUpdates.count
-        
-        switch dataPointCount {
-        case 0...6:
-            // Few data points: Show full month with year for clarity
+        // Time period aware formatting
+        switch selectedTimePeriod {
+        case .oneDay:
+            return date.formatted(.dateTime.hour(.conversationalDefaultDigits(amPM: .abbreviated)))
+        case .oneWeek:
+            return date.formatted(.dateTime.weekday(.abbreviated))
+        case .oneMonth:
+            let day = date.formatted(.dateTime.day(.twoDigits))
+            let month = date.formatted(.dateTime.month(.abbreviated))
+            return "\(day)\n\(month)"
+        case .threeMonths:
+            let day = date.formatted(.dateTime.day(.twoDigits))
+            let month = date.formatted(.dateTime.month(.abbreviated))
+            return "\(day)\n\(month)"
+        case .oneYear:
             let month = date.formatted(.dateTime.month(.abbreviated))
             let year = date.formatted(.dateTime.year(.twoDigits))
             return "\(month)\n\(year)"
-        case 7...12:
-            // Medium data points: Abbreviated month with year  
-            let month = date.formatted(.dateTime.month(.abbreviated))
-            let year = date.formatted(.dateTime.year(.twoDigits))
-            return "\(month)\n\(year)"
-        case 13...24:
-            // More data points: Compact month/year
-            let month = date.formatted(.dateTime.month(.abbreviated))
-            let year = date.formatted(.dateTime.year(.twoDigits))
-            return "\(month)\n\(year)"
-        default:
-            // Many data points: Very compact - just month and year
-            let month = date.formatted(.dateTime.month(.abbreviated))
-            let year = date.formatted(.dateTime.year(.twoDigits))
-            return "\(month)\n\(year)"
+        case .fiveYears, .max:
+            return date.formatted(.dateTime.year(.defaultDigits))
         }
     }
     
@@ -173,6 +172,21 @@ struct AccountChart: View {
         else {
             return paddedMin...paddedMax
         }
+    }
+    
+    private var xAxisDomain: ClosedRange<Date> {
+        // Always show full time period range
+        if selectedTimePeriod == .max {
+            // For max, use actual data range
+            guard !sortedBalanceUpdates.isEmpty else {
+                return Date()...Date()
+            }
+            let allDates = sortedBalanceUpdates.map { $0.date }
+            return (allDates.min() ?? Date())...(allDates.max() ?? Date())
+        }
+        
+        // Use time period's full range
+        return selectedTimePeriod.dateRange
     }
     
     private func getAreaBaseline() -> Double {
@@ -280,6 +294,7 @@ struct AccountChart: View {
                     }
                 }
                 .chartYScale(domain: yAxisDomain)
+                .chartXScale(domain: xAxisDomain)
             }
         }
         .padding(.top, 8)

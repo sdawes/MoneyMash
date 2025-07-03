@@ -45,44 +45,60 @@ struct BaseChart<T: ChartDataSource>: View {
     }
     
     private var selectedDataPoints: [Date] {
-        let allDates = sortedDataPoints.map { dataSource.getDate(from: $0) }
-        let dataPointCount = allDates.count
+        // Use time period aware x-axis dates for consistent display
+        let generatedDates = selectedTimePeriod.generateXAxisDates()
         
-        // Smart thinning based on number of data points
-        switch dataPointCount {
-        case 0...6:
-            return allDates
-        case 7...12:
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 2 == 0 ? date : nil
-            })
-        case 13...24:
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 3 == 0 ? date : nil
-            })
-        case 25...60:
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 6 == 0 ? date : nil
-            })
-        default:
-            return Array(allDates.enumerated().compactMap { index, date in
-                index % 12 == 0 ? date : nil
-            })
+        // For "Max" period, fall back to smart thinning of actual data
+        if selectedTimePeriod == .max {
+            let allDates = sortedDataPoints.map { dataSource.getDate(from: $0) }
+            let dataPointCount = allDates.count
+            
+            switch dataPointCount {
+            case 0...6:
+                return allDates
+            case 7...12:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 2 == 0 ? date : nil
+                })
+            case 13...24:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 3 == 0 ? date : nil
+                })
+            case 25...60:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 6 == 0 ? date : nil
+                })
+            default:
+                return Array(allDates.enumerated().compactMap { index, date in
+                    index % 12 == 0 ? date : nil
+                })
+            }
         }
+        
+        return generatedDates
     }
     
     private func formatDateLabel(for date: Date, monthsSpan: Int) -> String {
-        let dataPointCount = sortedDataPoints.count
-        
-        switch dataPointCount {
-        case 0...6, 7...12, 13...24:
+        // Time period aware formatting
+        switch selectedTimePeriod {
+        case .oneDay:
+            return date.formatted(.dateTime.hour(.conversationalDefaultDigits(amPM: .abbreviated)))
+        case .oneWeek:
+            return date.formatted(.dateTime.weekday(.abbreviated))
+        case .oneMonth:
+            let day = date.formatted(.dateTime.day(.twoDigits))
+            let month = date.formatted(.dateTime.month(.abbreviated))
+            return "\(day)\n\(month)"
+        case .threeMonths:
+            let day = date.formatted(.dateTime.day(.twoDigits))
+            let month = date.formatted(.dateTime.month(.abbreviated))
+            return "\(day)\n\(month)"
+        case .oneYear:
             let month = date.formatted(.dateTime.month(.abbreviated))
             let year = date.formatted(.dateTime.year(.twoDigits))
             return "\(month)\n\(year)"
-        default:
-            let month = date.formatted(.dateTime.month(.abbreviated))
-            let year = date.formatted(.dateTime.year(.twoDigits))
-            return "\(month)\n\(year)"
+        case .fiveYears, .max:
+            return date.formatted(.dateTime.year(.defaultDigits))
         }
     }
     
@@ -126,6 +142,21 @@ struct BaseChart<T: ChartDataSource>: View {
         else {
             return paddedMin...paddedMax
         }
+    }
+    
+    private var xAxisDomain: ClosedRange<Date> {
+        // Always show full time period range
+        if selectedTimePeriod == .max {
+            // For max, use actual data range
+            guard !sortedDataPoints.isEmpty else {
+                return Date()...Date()
+            }
+            let allDates = sortedDataPoints.map { dataSource.getDate(from: $0) }
+            return (allDates.min() ?? Date())...(allDates.max() ?? Date())
+        }
+        
+        // Use time period's full range
+        return selectedTimePeriod.dateRange
     }
     
     private func getAreaBaseline() -> Double {
@@ -239,6 +270,7 @@ struct BaseChart<T: ChartDataSource>: View {
                     }
                 }
                 .chartYScale(domain: yAxisDomain)
+                .chartXScale(domain: xAxisDomain)
             }
         }
         .padding(.top, 8)
