@@ -22,7 +22,32 @@ struct AccountChart: View {
         }
         
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-        return allUpdates.filter { $0.date >= cutoffDate }
+        let filteredUpdates = allUpdates.filter { $0.date >= cutoffDate }
+        
+        // If no data points exist in the time period, return empty
+        guard !filteredUpdates.isEmpty else { return [] }
+        
+        // If the first data point is after the cutoff date, extend the data backwards
+        // using the last known value to fill the gap
+        let firstUpdate = filteredUpdates.first!
+        
+        if firstUpdate.date > cutoffDate {
+            // Find the last known value before the time period starts
+            let lastKnownBalance: Decimal
+            if let lastUpdateBeforePeriod = allUpdates.last(where: { $0.date < cutoffDate }) {
+                lastKnownBalance = lastUpdateBeforePeriod.balance
+            } else {
+                // No historical data, use the first available value
+                lastKnownBalance = firstUpdate.balance
+            }
+            
+            // Create a balance update at the start of the time period with the last known value
+            let startUpdate = BalanceUpdate(balance: lastKnownBalance, account: account)
+            startUpdate.date = cutoffDate
+            return [startUpdate] + filteredUpdates
+        }
+        
+        return filteredUpdates
     }
     
     private var dataTimeSpanInMonths: Int {

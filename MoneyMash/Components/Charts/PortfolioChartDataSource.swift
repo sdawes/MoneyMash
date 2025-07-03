@@ -51,7 +51,32 @@ class PortfolioChartDataSource: ChartDataSource {
         }
         
         let cutoffDate = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
-        return points.filter { $0.date >= cutoffDate }
+        let filteredPoints = points.filter { $0.date >= cutoffDate }
+        
+        // If no data points exist in the time period, return empty
+        guard !filteredPoints.isEmpty else { return [] }
+        
+        // If the first data point is after the cutoff date, extend the data backwards
+        // using the earliest available value to fill the gap
+        let firstDataPoint = filteredPoints.first!
+        let allPointsSorted = points.sorted { $0.date < $1.date }
+        
+        if firstDataPoint.date > cutoffDate {
+            // Find the last known value before the time period starts
+            let lastKnownValue: Double
+            if let lastPointBeforePeriod = allPointsSorted.last(where: { $0.date < cutoffDate }) {
+                lastKnownValue = lastPointBeforePeriod.value
+            } else {
+                // No historical data, use the first available value
+                lastKnownValue = firstDataPoint.value
+            }
+            
+            // Create a data point at the start of the time period with the last known value
+            let startPoint = ChartDataPoint(date: cutoffDate, value: lastKnownValue)
+            return [startPoint] + filteredPoints
+        }
+        
+        return filteredPoints
     }
     
     func getValue(from dataPoint: ChartDataPoint) -> Double {
