@@ -12,8 +12,8 @@ struct FinancialAccountCard: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 6) {
                     ProviderDisplay(provider: account.provider, size: .small)
                     
                     Text(account.type.rawValue)

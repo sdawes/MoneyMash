@@ -16,8 +16,8 @@ struct ProviderDisplay: View {
         
         var imageSize: CGFloat {
             switch self {
-            case .small: return 24
-            case .large: return 32
+            case .small: return 32
+            case .large: return 40
             }
         }
         
@@ -37,13 +37,20 @@ struct ProviderDisplay: View {
     private var assetName: String {
         // Convert provider name to asset name format
         // "HL" -> "provider_logo_hl"
-        // "Trading 212" -> "provider_logo_trading212"
+        // "Trading 212" -> "provider_logo_t212"
         // "Vanguard" -> "provider_logo_vanguard"
-        let cleanProvider = provider
-            .lowercased()
-            .replacingOccurrences(of: " ", with: "")
-            .replacingOccurrences(of: "&", with: "and")
-        return "provider_logo_\(cleanProvider)"
+        
+        // Special cases for specific provider names
+        switch provider {
+        case "Trading 212":
+            return "provider_logo_t212"
+        default:
+            let cleanProvider = provider
+                .lowercased()
+                .replacingOccurrences(of: " ", with: "")
+                .replacingOccurrences(of: "&", with: "and")
+            return "provider_logo_\(cleanProvider)"
+        }
     }
     
     private var hasLogo: Bool {
@@ -60,6 +67,7 @@ struct ProviderDisplay: View {
         } else {
             Text(provider)
                 .font(size.font)
+                .fontWeight(.semibold)
                 .foregroundColor(.secondary)
         }
     }
