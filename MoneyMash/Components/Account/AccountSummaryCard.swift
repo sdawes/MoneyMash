@@ -17,9 +17,7 @@ struct AccountSummaryCard: View {
                     .font(.title2)
                     .fontWeight(.bold)
                 
-                Text(account.provider)
-                    .font(.title3)
-                    .foregroundColor(.secondary)
+                ProviderDisplay(provider: account.provider, size: .large)
             }
             
             VStack(alignment: .leading, spacing: 4) {

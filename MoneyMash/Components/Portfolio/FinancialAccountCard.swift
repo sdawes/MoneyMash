@@ -14,15 +14,9 @@ struct FinancialAccountCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
-                    HStack(spacing: 8) {
-                        AccountIcon(accountType: account.type)
-                        
-                        Text(account.type.rawValue)
-                            .font(.headline)
-                            .fontWeight(.semibold)
-                    }
+                    ProviderDisplay(provider: account.provider, size: .small)
                     
-                    Text("Provider: \(account.provider)")
+                    Text(account.type.rawValue)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }

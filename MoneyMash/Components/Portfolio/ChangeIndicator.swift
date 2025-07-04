@@ -64,13 +64,4 @@ struct ChangeIndicator: View {
     }
 }
 
-#Preview {
-    VStack(spacing: 8) {
-        ChangeIndicator(change: 1500.50, isDebtAccount: false)
-        ChangeIndicator(change: -750.25, isDebtAccount: false)
-        ChangeIndicator(change: 1200.00, isDebtAccount: true)
-        ChangeIndicator(change: -800.00, isDebtAccount: true)
-        ChangeIndicator(change: 0, isDebtAccount: false)
-    }
-    .padding()
-}
+
