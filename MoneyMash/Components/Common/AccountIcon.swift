@@ -15,12 +15,12 @@ struct AccountIcon: View {
             // Colored circle background
             Circle()
                 .fill(accountType.circleColor)
-                .frame(width: 24, height: 24)
+                .frame(width: 25, height: 25)
             
             // Black outline circle
             Circle()
                 .stroke(Color.black, lineWidth: 1)
-                .frame(width: 24, height: 24)
+                .frame(width: 25, height: 25)
             
             // Black icon
             Image(systemName: accountType.sfSymbol)

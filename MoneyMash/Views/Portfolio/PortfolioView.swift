@@ -15,8 +15,6 @@ struct PortfolioView: View {
     @State private var showingPortfolioOptions = false
     @State private var includePensions = true
     @State private var includeMortgage = true
-    @State private var selectedChartTimePeriod: ChartTimePeriod = .oneYear
-    @State private var showingChartTimeFilter = false
     
     private var sortedAccounts: [FinancialAccount] {
         accounts.sorted { $0.currentBalance > $1.currentBalance }
@@ -33,16 +31,8 @@ struct PortfolioView: View {
                         showingOptions: $showingPortfolioOptions
                     )
                     .padding(.horizontal)
+                    .padding(.top, 10)
                     
-                    // Portfolio Chart Card
-                    PortfolioChartCard(
-                        selectedTimePeriod: $selectedChartTimePeriod,
-                        showingTimeFilter: $showingChartTimeFilter,
-                        includePensions: $includePensions,
-                        includeMortgage: $includeMortgage
-                    )
-                    .padding(.horizontal)
-                    .padding(.top, 12)
                     
                     // Account Cards Section
                     LazyVStack(spacing: 12) {
@@ -92,50 +82,23 @@ struct PortfolioView: View {
                         .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingPortfolioOptions)
                     }
                     
-                    if showingChartTimeFilter {
-                        ZStack {
-                            // Background dimming with tap to dismiss
-                            Color.black.opacity(0.1)
-                                .ignoresSafeArea()
-                                .onTapGesture {
-                                    withAnimation(.easeOut(duration: 0.2)) {
-                                        showingChartTimeFilter = false
-                                    }
-                                }
-                            
-                            // Chart Time Filter Modal centered
-                            ChartTimeFilterModal(
-                                selectedPeriod: $selectedChartTimePeriod,
-                                isPresented: $showingChartTimeFilter
-                            )
-                            .transition(.asymmetric(
-                                insertion: .scale(scale: 0.8).combined(with: .opacity),
-                                removal: .scale(scale: 0.9).combined(with: .opacity)
-                            ))
-                        }
-                        .animation(.spring(response: 0.3, dampingFraction: 0.8), value: showingChartTimeFilter)
-                    }
                 }
-                .allowsHitTesting(showingPortfolioOptions || showingChartTimeFilter)
+                .allowsHitTesting(showingPortfolioOptions)
             )
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Text("MoneyMash")
+                        .font(.appTitle)
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     NavigationLink(destination: AddAccountView()) {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                            .fontWeight(.medium)
+                        AddButton()
                     }
                 }
             }
             .onAppear {
-                #if DEBUG
-                // Populate with sample data if database is empty (debug only)
-                SampleData.populateIfEmpty(context: context)
-                #endif
+                // Sample data population is now handled in ContentView
             }
         }
     }

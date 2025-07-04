@@ -95,6 +95,7 @@ struct UpdateBalanceCard: View {
         
         do {
             try context.save()
+            
             // Stay on account detail view after successful update
         } catch {
             errorMessage = "Failed to save balance update: \(error.localizedDescription)"

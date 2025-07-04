@@ -10,13 +10,82 @@ import SwiftData
 
 #if DEBUG
 struct SampleData {
+    // MARK: - Database Management
+    static func clearAllData(context: ModelContext) {
+        print("🗑️ [SampleData] Clearing all existing data...")
+        
+        // Delete all balance updates first (due to relationships)
+        let balanceDescriptor = FetchDescriptor<BalanceUpdate>()
+        let allBalanceUpdates = (try? context.fetch(balanceDescriptor)) ?? []
+        for update in allBalanceUpdates {
+            context.delete(update)
+        }
+        
+        // Delete all accounts
+        let accountDescriptor = FetchDescriptor<FinancialAccount>()
+        let allAccounts = (try? context.fetch(accountDescriptor)) ?? []
+        for account in allAccounts {
+            context.delete(account)
+        }
+        
+        // Save changes
+        do {
+            try context.save()
+            print("✅ [SampleData] Successfully cleared \(allAccounts.count) accounts and \(allBalanceUpdates.count) balance updates")
+        } catch {
+            print("❌ [SampleData] Failed to clear data: \(error)")
+        }
+    }
+    
+    static func resetAndPopulateFreshData(context: ModelContext) {
+        print("🔄 [SampleData] Resetting database and creating fresh sample data...")
+        clearAllData(context: context)
+        createFreshSampleData(context: context)
+    }
+    
     // MARK: - Sample Data 1 (Diverse Time Ranges) - ACTIVE
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
         let existingAccounts = (try? context.fetch(fetchDescriptor)) ?? []
         
-        guard existingAccounts.isEmpty else { return }
+        if !existingAccounts.isEmpty {
+            print("📊 [SampleData] Found \(existingAccounts.count) existing accounts - analyzing data integrity...")
+            
+            var hasDataIssues = false
+            var totalUpdates = 0
+            
+            for account in existingAccounts {
+                let updateCount = account.balanceUpdates.count
+                totalUpdates += updateCount
+                
+                // Check for excessive updates (should be max 84 for Junior ISA)
+                if updateCount > 100 {
+                    print("⚠️ [SampleData] Account \(account.provider) \(account.type.rawValue) has \(updateCount) updates (expected max: 84)")
+                    hasDataIssues = true
+                } else {
+                    print("✅ [SampleData] Account \(account.provider) \(account.type.rawValue) has \(updateCount) updates")
+                }
+            }
+            
+            print("📊 [SampleData] Total: \(existingAccounts.count) accounts, \(totalUpdates) balance updates")
+            
+            if hasDataIssues {
+                print("⚠️ [SampleData] Data corruption detected! Consider calling resetAndPopulateFreshData() to fix.")
+            } else {
+                print("✅ [SampleData] Data integrity verified - all accounts have expected update counts")
+            }
+            
+            return
+        }
+        
+        print("📊 [SampleData] No existing data found - creating fresh sample data...")
+        createFreshSampleData(context: context)
+    }
+    
+    // MARK: - Fresh Sample Data Creation
+    static func createFreshSampleData(context: ModelContext) {
+        print("🆕 [SampleData] Creating fresh sample data with expected counts...")
         
         let calendar = Calendar.current
         let now = Date()
@@ -153,7 +222,7 @@ struct SampleData {
         context.insert(creditCard)
         
         var creditCardBalances: [Decimal] = []
-        for i in 0..<18 {
+        for _ in 0..<18 {
             // Credit cards fluctuate between £200-£2000 debt
             let variance = Double.random(in: -2000...(-200))
             creditCardBalances.append(Decimal(variance))
@@ -185,7 +254,24 @@ struct SampleData {
         }
         
         // Save all changes
-        try? context.save()
+        do {
+            try context.save()
+            print("✅ [SampleData] Successfully created fresh sample data:")
+            print("   • 10 accounts with expected update counts:")
+            print("     - Vanguard Pension: 60 updates")
+            print("     - Trading 212 Stocks ISA: 36 updates")
+            print("     - Marcus Savings: 12 updates")
+            print("     - Monzo Cash ISA: 8 updates")
+            print("     - HL General Investment: 4 updates")
+            print("     - Starling Current Account: 2 updates")
+            print("     - Wise Foreign Currency: 6 updates")
+            print("     - Halifax Mortgage: 60 updates")
+            print("     - Chase Credit Card: 18 updates")
+            print("     - Fidelity Junior ISA: 84 updates (max)")
+            print("   • Total: 290 balance updates across all accounts")
+        } catch {
+            print("❌ [SampleData] Failed to save fresh sample data: \(error)")
+        }
     }
     
     // MARK: - Sample Data 2 (Extended 3-Year History) - COMMENTED OUT
