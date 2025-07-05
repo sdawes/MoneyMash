@@ -20,9 +20,17 @@ struct PortfolioSummaryCard: View {
             // Row 1: Net Worth with options button in top right
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Net Worth")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
+                    HStack(spacing: 4) {
+                        Text("Net Worth")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        
+                        if includePensions || includeMortgage {
+                            Text(netWorthInclusionText)
+                                .font(.caption2)
+                                .foregroundColor(.white.opacity(0.7))
+                        }
+                    }
                     
                     Text(totalNetWorth.formatted(.currency(code: "GBP")))
                         .font(.system(.largeTitle, weight: .bold))
@@ -45,22 +53,24 @@ struct PortfolioSummaryCard: View {
             
             // Row 2: Assets and Debt columns
             HStack(spacing: 16) {
-                // Left Column: Total Assets
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Total Assets")
-                        .font(.subheadline)
-                        .foregroundColor(.white)
-                    
-                    Text(totalAssets.formatted(.currency(code: "GBP")))
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                    
-                    if hasChangeData {
-                        ChangeIndicator(change: totalAssetsChange, isDebtAccount: false)
+                // Left Column: Total Assets (conditional)
+                if shouldShowAssets {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Assets")
+                            .font(.subheadline)
+                            .foregroundColor(.white)
+                        
+                        Text(totalAssets.formatted(.currency(code: "GBP")))
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                        
+                        if hasChangeData {
+                            ChangeIndicator(change: totalAssetsChange, isDebtAccount: false)
+                        }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 
                 // Right Column: Total Debt (conditional)
                 if hasAnyDebt {
@@ -72,15 +82,15 @@ struct PortfolioSummaryCard: View {
                         Text(totalDebt.formatted(.currency(code: "GBP")))
                             .font(.title3)
                             .fontWeight(.semibold)
-                            .foregroundColor(ColorTheme.debtRed)
+                            .foregroundColor(Color.standardRed)
                         
                         if hasChangeData {
                             ChangeIndicator(change: totalDebtChange, isDebtAccount: true)
                         }
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                } else {
-                    // Empty space to maintain grid structure
+                } else if shouldShowAssets {
+                    // Empty space to maintain grid structure when assets are shown
                     VStack {
                         Spacer()
                     }
@@ -256,6 +266,24 @@ struct PortfolioSummaryCard: View {
     }
     
     // MARK: - Helper Functions
+    
+    private var netWorthInclusionText: String {
+        switch (includePensions, includeMortgage) {
+        case (true, true):
+            return "(inc. pension & mortgage)"
+        case (true, false):
+            return "(inc. pension)"
+        case (false, true):
+            return "(inc. mortgage)"
+        case (false, false):
+            return ""
+        }
+    }
+    
+    private var shouldShowAssets: Bool {
+        // Hide assets when net worth equals total assets (no debt to subtract)
+        return totalAssets != totalNetWorth
+    }
     
     private func isDebtAccount(_ accountType: AccountType) -> Bool {
         switch accountType {

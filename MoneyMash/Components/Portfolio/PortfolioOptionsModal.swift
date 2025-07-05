@@ -44,7 +44,7 @@ struct PortfolioOptionsModal: View {
             }
             
             // Include Mortgage toggle (conditional)
-            if hasMixedDebt {
+            if hasMortgage {
                 HStack {
                     Text("Include Mortgage")
                         .font(.body)
@@ -62,6 +62,10 @@ struct PortfolioOptionsModal: View {
     }
     
     // MARK: - Helper Properties
+    
+    private var hasMortgage: Bool {
+        accounts.contains { $0.type == .mortgage }
+    }
     
     private var hasMixedDebt: Bool {
         let debtAccounts = accounts.filter { isDebtAccount($0.type) }

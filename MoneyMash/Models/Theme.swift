@@ -12,6 +12,7 @@ extension Color {
     // App Brand Colors
     static let navyBlue = Color(red: 0.11, green: 0.25, blue: 0.49)
     static let darkRed = Color(red: 0.7, green: 0.2, blue: 0.2)
+    static let standardRed = Color.red
     
     // Currently using system defaults, but ready for custom theming
     // Example: static let textPrimary = Color.black
