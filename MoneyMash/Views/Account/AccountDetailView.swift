@@ -40,8 +40,7 @@ struct AccountDetailView: View {
                 Button(action: {
                     showDeleteConfirmation = true
                 }) {
-                    Image(systemName: "trash")
-                        .foregroundColor(.red)
+                    DeleteIcon()
                 }
             }
         }

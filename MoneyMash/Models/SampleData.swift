@@ -10,7 +10,7 @@ import SwiftData
 
 #if DEBUG
 struct SampleData {
-    // MARK: - Database Management
+    // MARK: - Database Utilities
     static func clearAllData(context: ModelContext) {
         print("🗑️ [SampleData] Clearing all existing data...")
         
@@ -37,45 +37,14 @@ struct SampleData {
         }
     }
     
-    static func resetAndPopulateFreshData(context: ModelContext) {
-        print("🔄 [SampleData] Resetting database and creating fresh sample data...")
-        clearAllData(context: context)
-        createFreshSampleData(context: context)
-    }
-    
-    // MARK: - Sample Data 1 (Diverse Time Ranges) - ACTIVE
+    // MARK: - Sample Data Creation
     static func populateIfEmpty(context: ModelContext) {
         // Check if we already have data
         let fetchDescriptor = FetchDescriptor<FinancialAccount>()
         let existingAccounts = (try? context.fetch(fetchDescriptor)) ?? []
         
-        if !existingAccounts.isEmpty {
-            print("📊 [SampleData] Found \(existingAccounts.count) existing accounts - analyzing data integrity...")
-            
-            var hasDataIssues = false
-            var totalUpdates = 0
-            
-            for account in existingAccounts {
-                let updateCount = account.balanceUpdates.count
-                totalUpdates += updateCount
-                
-                // Check for excessive updates (should be max 84 for Junior ISA)
-                if updateCount > 100 {
-                    print("⚠️ [SampleData] Account \(account.provider) \(account.type.rawValue) has \(updateCount) updates (expected max: 84)")
-                    hasDataIssues = true
-                } else {
-                    print("✅ [SampleData] Account \(account.provider) \(account.type.rawValue) has \(updateCount) updates")
-                }
-            }
-            
-            print("📊 [SampleData] Total: \(existingAccounts.count) accounts, \(totalUpdates) balance updates")
-            
-            if hasDataIssues {
-                print("⚠️ [SampleData] Data corruption detected! Consider calling resetAndPopulateFreshData() to fix.")
-            } else {
-                print("✅ [SampleData] Data integrity verified - all accounts have expected update counts")
-            }
-            
+        guard existingAccounts.isEmpty else {
+            print("📊 [SampleData] Found \(existingAccounts.count) existing accounts - skipping sample data creation")
             return
         }
         
