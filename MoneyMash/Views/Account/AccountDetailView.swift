@@ -25,6 +25,9 @@ struct AccountDetailView: View {
                 // Account Header
                 AccountSummaryCard(account: account)
                 
+                // Balance Chart
+                AccountChart(account: account)
+                
                 // Update Balance Form
                 UpdateBalanceCard(account: account)
                 

@@ -96,6 +96,10 @@ struct UpdateBalanceCard: View {
         do {
             try context.save()
             
+            // Create portfolio snapshot with current portfolio settings
+            let snapshotManager = PortfolioSnapshotManager(modelContext: context)
+            snapshotManager.createTodaysSnapshot(includePensions: true, includeMortgage: true)
+            
             // Stay on account detail view after successful update
         } catch {
             errorMessage = "Failed to save balance update: \(error.localizedDescription)"

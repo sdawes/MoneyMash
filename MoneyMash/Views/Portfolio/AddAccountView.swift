@@ -111,6 +111,11 @@ struct AddAccountView: View {
         
         do {
             try context.save()
+            
+            // Create portfolio snapshot with current portfolio settings
+            let snapshotManager = PortfolioSnapshotManager(modelContext: context)
+            snapshotManager.createTodaysSnapshot(includePensions: true, includeMortgage: true)
+            
             dismiss()
         } catch {
             errorMessage = "Failed to save account: \(error.localizedDescription)"

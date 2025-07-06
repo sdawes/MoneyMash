@@ -33,6 +33,12 @@ struct PortfolioView: View {
                     .padding(.horizontal)
                     .padding(.top, 10)
                     
+                    // Portfolio Chart
+                    PortfolioChart(
+                        includePensions: includePensions,
+                        includeMortgage: includeMortgage
+                    )
+                    .padding(.top, 16)
                     
                     // Account Cards Section
                     LazyVStack(spacing: 12) {
@@ -99,6 +105,10 @@ struct PortfolioView: View {
             }
             .onAppear {
                 // Sample data population is now handled in ContentView
+                
+                // Create portfolio snapshots if they don't exist
+                let snapshotManager = PortfolioSnapshotManager(modelContext: context)
+                snapshotManager.createSnapshotsIfNeeded(includePensions: includePensions, includeMortgage: includeMortgage)
             }
         }
     }
